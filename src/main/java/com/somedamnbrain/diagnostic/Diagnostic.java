@@ -12,6 +12,13 @@ import com.somedamnbrain.entities.Entities.DiagnosticResult;
 public interface Diagnostic {
 
 	/**
+	 * Get a description of the diagnostic.
+	 * 
+	 * @return
+	 */
+	String getDescription();
+
+	/**
 	 * Start the diagnostic and return a DiagnosticResult. Diagnostic should be
 	 * idempotent and leave the situation unchanged.
 	 * 
@@ -20,6 +27,13 @@ public interface Diagnostic {
 	 */
 	DiagnosticResult attemptDiagnostic();
 
-	Correction getCorrection(DiagnosticResult diagnosticResult);
+	/**
+	 * Return a correction for the diagnostic.
+	 * 
+	 * @param diagnosticResult
+	 *            diagnostic result.
+	 * @return a correction
+	 */
+	CorrectiveAction getCorrection(DiagnosticResult diagnosticResult);
 
 }

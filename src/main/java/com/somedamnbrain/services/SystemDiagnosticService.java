@@ -1,12 +1,16 @@
 package com.somedamnbrain.services;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
-import com.somedamnbrain.diagnostic.Correction;
+import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
+import com.somedamnbrain.diagnostic.DiagnosticRun;
 import com.somedamnbrain.diagnostic.EnumDiagnosticAttempt;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.ExplainableException;
+import com.somedamnbrain.services.alert.AlertService;
 import com.somedamnbrain.systems.SDBSystem;
 
 public class SystemDiagnosticService {
@@ -34,12 +38,12 @@ public class SystemDiagnosticService {
 			SDBSystem currentSystem = iterator.next();
 			try {
 				this.diagnosticSingleSystem(currentSystem, skipCorrections);
-				selectorService.markSystemAsDiagnosticated(currentSystem);
 			} catch (UnrecoverableDiagnosticFailureException e) {
 				// If a system has a unrecoverable failure, we pursue diagnostic
-				// but do not attempt any more correction.
+				// but do not attempt any more correction on other systems.
 				skipCorrections = true;
 			}
+			selectorService.markSystemAsDiagnosticated(currentSystem);
 		}
 	}
 
@@ -55,22 +59,30 @@ public class SystemDiagnosticService {
 	 */
 	private void diagnosticSingleSystem(SDBSystem system, boolean skipCorrections)
 			throws UnrecoverableDiagnosticFailureException {
+		List<DiagnosticRun> unrecoverableFailures = new ArrayList<DiagnosticRun>();
+
 		for (Diagnostic diagnostic : system.getDiagnostics()) {
 			DiagnosticResult result = diagnostic.attemptDiagnostic();
 			if (!result.getSuccess()) {
-				alertService.alertDiagnosticFailure(diagnostic, result, skipCorrections
+				alertService.alertDiagnostic(system, diagnostic, result, skipCorrections
 						? EnumDiagnosticAttempt.SKIP_CORRECTIONS : EnumDiagnosticAttempt.CAN_ATTEMPT_CORRECTION);
 				if (!skipCorrections) {
-					Correction correction = diagnostic.getCorrection(result);
+					CorrectiveAction correction = diagnostic.getCorrection(result);
 					correction.attemptCorrection();
 					DiagnosticResult finalResult = diagnostic.attemptDiagnostic();
-					alertService.alertDiagnosticFailure(diagnostic, result, EnumDiagnosticAttempt.CORRECTION_ATTEMPTED);
+					alertService.alertDiagnostic(system, diagnostic, result,
+							EnumDiagnosticAttempt.CORRECTION_ATTEMPTED);
 					if (!finalResult.getSuccess()) {
-						throw new UnrecoverableDiagnosticFailureException();
+						unrecoverableFailures.add(new DiagnosticRun(diagnostic, finalResult));
 					}
 				}
 
 			}
+		}
+
+		if (!unrecoverableFailures.isEmpty()) {
+			alertService.alertSystem(system, unrecoverableFailures);
+			throw new UnrecoverableDiagnosticFailureException();
 		}
 	}
 

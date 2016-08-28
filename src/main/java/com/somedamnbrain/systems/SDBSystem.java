@@ -14,6 +14,13 @@ import com.somedamnbrain.diagnostic.Diagnostic;
 public interface SDBSystem {
 
 	/**
+	 * A name for the system.
+	 * 
+	 * @return
+	 */
+	String getSystemName();
+
+	/**
 	 * Return the dependencies of the system. Ideally run the diagnostics of
 	 * every dependencies of a system before running the ones of a system. I
 	 * 
