@@ -1,0 +1,5 @@
+package com.somedamnbrain.entities;
+
+message Universe {
+	optional string name = 1;
+}
