@@ -1,6 +1,7 @@
 package com.somedamnbrain.services;
 
 import com.somedamnbrain.diagnostic.Diagnostic;
+import com.somedamnbrain.diagnostic.EnumDiagnosticAttempt;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 
 public class AlertService {
@@ -17,8 +18,7 @@ public class AlertService {
 	 *            attempted)
 	 */
 	public void alertDiagnosticFailure(final Diagnostic diagnostic, final DiagnosticResult diagnosticResult,
-			final boolean finalResult) {
+			final EnumDiagnosticAttempt attemptType) {
 		throw new RuntimeException("not implemented");
 	}
-
 }
