@@ -3,3 +3,7 @@ package com.somedamnbrain.entities;
 message Universe {
 	optional string name = 1;
 }
+
+message DiagnosticResult {
+	optional string human_message = 1;
+}
