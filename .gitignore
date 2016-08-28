@@ -2,4 +2,4 @@
 .classpath
 .project
 .settings/
-src/main/java/com/somedamnmusic/entities/Entities.java
+src/main/java/com/somedamnbrain/entities/Entities.java
