@@ -7,4 +7,5 @@ message Universe {
 message DiagnosticResult {
 	optional bool success = 1; 
 	optional string human_message = 2;
+	optional string machine_message = 3;
 }

@@ -1,6 +1,6 @@
 package com.somedamnbrain.exceptions;
 
-public class ExplainableException extends Exception {
+public abstract class ExplainableException extends Exception {
 
 	/**
 	 * 

@@ -1,6 +1,8 @@
 package com.somedamnbrain.diagnostic;
 
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
+import com.somedamnbrain.exceptions.NoResultException;
+import com.somedamnbrain.exceptions.UnexplainableException;
 
 /**
  * In somedamnbrain, a diagnostic is a monitoring action on a system. Diagnostic
@@ -12,20 +14,21 @@ import com.somedamnbrain.entities.Entities.DiagnosticResult;
 public interface Diagnostic {
 
 	/**
-	 * Get a description of the diagnostic.
+	 * Get a unique id (description) of the diagnostic. Please stay alphanumeric
+	 * + space there. Ex : "Checking universe file existence on the system"
 	 * 
 	 * @return
 	 */
-	String getDescription();
+	String getUniqueID();
 
 	/**
 	 * Start the diagnostic and return a DiagnosticResult. Diagnostic should be
 	 * idempotent and leave the situation unchanged.
 	 * 
-	 * @param system
-	 * @return
+	 * @throws UnexplainableException
+	 *             if something unexpected occured during the correction
 	 */
-	DiagnosticResult attemptDiagnostic();
+	DiagnosticResult attemptDiagnostic() throws UnexplainableException;
 
 	/**
 	 * Return a correction for the diagnostic.
@@ -34,6 +37,6 @@ public interface Diagnostic {
 	 *            diagnostic result.
 	 * @return a correction
 	 */
-	CorrectiveAction getCorrection(DiagnosticResult diagnosticResult);
+	CorrectiveAction getCorrection(DiagnosticResult diagnosticResult) throws NoResultException;
 
 }

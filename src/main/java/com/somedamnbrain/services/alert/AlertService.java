@@ -33,7 +33,9 @@ public class AlertService {
 			case SKIP_CORRECTIONS:
 				this.alertDiagnosticFailureWithNoCorrections(system, diagnostic, diagnosticResult);
 				break;
-
+			case CORRECTION_UNAVAILABLE:
+				this.alertDiagnosticCorrectionUnavailable(system, diagnostic, diagnosticResult);
+				break;
 			case CORRECTION_ATTEMPTED:
 			default:
 				this.alertDiagnosticUnrecoverableFailure(system, diagnostic, diagnosticResult);
@@ -43,13 +45,38 @@ public class AlertService {
 		}
 	}
 
+	private void alertDiagnosticCorrectionUnavailable(SDBSystem system, Diagnostic diagnostic,
+			DiagnosticResult diagnosticResult) {
+		String subject = system.getUniqueID() + " - Unrecoverable failure detected";
+		StringBuilder content = new StringBuilder();
+		content.append("The following diagnostic regarding system " + system.getUniqueID()
+				+ " is in an unrecoverable failure : ");
+		content.append(System.lineSeparator());
+		content.append(diagnostic.getUniqueID());
+
+		content.append(System.lineSeparator());
+		content.append(System.lineSeparator());
+
+		content.append("The diagnostic contained the following remarks : ");
+		content.append(System.lineSeparator());
+		content.append(diagnosticResult.getHumanMessage());
+
+		content.append(System.lineSeparator());
+		content.append(System.lineSeparator());
+
+		content.append("No correction is available for this problem. I can't do it on my own !");
+
+		this.alert(new Alert(subject, content.toString()));
+
+	}
+
 	private void alertDiagnosticFailureWithNoCorrections(SDBSystem system, Diagnostic diagnostic,
 			DiagnosticResult diagnosticResult) {
-		String subject = system.getSystemName() + " - Partial failure detected";
+		String subject = system.getUniqueID() + " - Partial failure detected";
 		StringBuilder content = new StringBuilder();
-		content.append("The following diagnostic regarding system " + system.getSystemName() + " is in an failure : ");
+		content.append("The following diagnostic regarding system " + system.getUniqueID() + " is in an failure : ");
 		content.append(System.lineSeparator());
-		content.append(diagnostic.getDescription());
+		content.append(diagnostic.getUniqueID());
 
 		content.append(System.lineSeparator());
 		content.append(System.lineSeparator());
@@ -70,12 +97,12 @@ public class AlertService {
 
 	private void alertDiagnosticUnrecoverableFailure(SDBSystem system, Diagnostic diagnostic,
 			DiagnosticResult diagnosticResult) {
-		String subject = system.getSystemName() + " - Unrecoverable failure detected";
+		String subject = system.getUniqueID() + " - Unrecoverable failure detected";
 		StringBuilder content = new StringBuilder();
-		content.append("The following diagnostic regarding system " + system.getSystemName()
+		content.append("The following diagnostic regarding system " + system.getUniqueID()
 				+ " is in an unrecoverable failure : ");
 		content.append(System.lineSeparator());
-		content.append(diagnostic.getDescription());
+		content.append(diagnostic.getUniqueID());
 
 		content.append(System.lineSeparator());
 		content.append(System.lineSeparator());
@@ -95,12 +122,12 @@ public class AlertService {
 
 	private void alertDiagnosticPartialFailure(SDBSystem system, Diagnostic diagnostic,
 			DiagnosticResult diagnosticResult) {
-		String subject = system.getSystemName() + " - Partial failure detected";
+		String subject = system.getUniqueID() + " - Partial failure detected";
 		StringBuilder content = new StringBuilder();
 		content.append(
-				"The following diagnostic regarding system " + system.getSystemName() + " is in partial failure : ");
+				"The following diagnostic regarding system " + system.getUniqueID() + " is in partial failure : ");
 		content.append(System.lineSeparator());
-		content.append(diagnostic.getDescription());
+		content.append(diagnostic.getUniqueID());
 
 		content.append(System.lineSeparator());
 		content.append(System.lineSeparator());
@@ -120,12 +147,11 @@ public class AlertService {
 
 	private void alertDiagnosticSuccess(final SDBSystem system, final Diagnostic diagnostic,
 			final DiagnosticResult diagnosticResult) {
-		String subject = system.getSystemName() + " - Diagnostic OK";
+		String subject = system.getUniqueID() + " - Diagnostic OK";
 		StringBuilder content = new StringBuilder();
-		content.append(
-				"The following diagnostic regarding system " + system.getSystemName() + " is back in success : ");
+		content.append("The following diagnostic regarding system " + system.getUniqueID() + " is back in success : ");
 		content.append(System.lineSeparator());
-		content.append(diagnostic.getDescription());
+		content.append(diagnostic.getUniqueID());
 
 		content.append(System.lineSeparator());
 		content.append(System.lineSeparator());
@@ -146,17 +172,17 @@ public class AlertService {
 
 	public void alertSystem(SDBSystem system, List<DiagnosticRun> unrecoverableFailures) {
 		if (!unrecoverableFailures.isEmpty()) {
-			String subject = system.getSystemName() + " is DOWN";
+			String subject = system.getUniqueID() + " is DOWN";
 			StringBuilder content = new StringBuilder();
 
-			content.append("The system " + system.getSystemName()
+			content.append("The system " + system.getUniqueID()
 					+ " is down due to the following diagnostics reporting unrecoverable failures.");
 
 			content.append(System.lineSeparator());
 			content.append(System.lineSeparator());
 
 			for (DiagnosticRun failure : unrecoverableFailures) {
-				content.append(failure.getDiagnostic().getDescription());
+				content.append(failure.getDiagnostic().getUniqueID());
 				content.append(System.lineSeparator());
 			}
 
@@ -164,10 +190,10 @@ public class AlertService {
 
 			this.alert(new Alert(subject, content.toString()));
 		} else {
-			String subject = system.getSystemName() + " is UP";
+			String subject = system.getUniqueID() + " is UP";
 			StringBuilder content = new StringBuilder();
 
-			content.append("The system " + system.getSystemName() + " is up with no unrecoverable failures.");
+			content.append("The system " + system.getUniqueID() + " is up with no unrecoverable failures.");
 
 			this.alert(new Alert(subject, content.toString()));
 		}

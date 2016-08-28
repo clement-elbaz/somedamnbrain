@@ -18,7 +18,7 @@ public interface SDBSystem {
 	 * 
 	 * @return
 	 */
-	String getSystemName();
+	String getUniqueID();
 
 	/**
 	 * Return the dependencies of the system. Ideally run the diagnostics of
@@ -37,5 +37,12 @@ public interface SDBSystem {
 	 * @return a list of diagnostic to run on this system.
 	 */
 	List<Diagnostic> getDiagnostics();
+
+	/**
+	 * This method is called after the full diagnostic of the system, if and
+	 * only if the system is operational. That if, no unrecoverable failures
+	 * were encountered during the diagnostic run.
+	 */
+	void executeIfOperational();
 
 }
