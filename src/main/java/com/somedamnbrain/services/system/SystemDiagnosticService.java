@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.diagnostic.DiagnosticRun;
@@ -16,6 +18,8 @@ import com.somedamnbrain.services.alert.AlertService;
 import com.somedamnbrain.systems.SDBSystem;
 
 public class SystemDiagnosticService {
+
+	private final static int MAX_NUMBER_ATTEMPT = 50;
 
 	private final AlertService alertService;
 	private final SystemSelectorService selectorService;
@@ -70,32 +74,91 @@ public class SystemDiagnosticService {
 		for (Diagnostic diagnostic : system.getDiagnostics()) {
 			DiagnosticResult result = diagnostic.attemptDiagnostic();
 			if (!result.getSuccess()) {
-				try {
-					CorrectiveAction correction = diagnostic.getCorrection(result);
-					alertService.alertDiagnostic(system, diagnostic, result, skipCorrections
-							? EnumDiagnosticAttempt.SKIP_CORRECTIONS : EnumDiagnosticAttempt.CAN_ATTEMPT_CORRECTION);
-					if (!skipCorrections) {
-						correction.attemptCorrection();
-						DiagnosticResult finalResult = diagnostic.attemptDiagnostic();
-						alertService.alertDiagnostic(system, diagnostic, finalResult,
-								EnumDiagnosticAttempt.CORRECTION_ATTEMPTED);
-						if (!finalResult.getSuccess()) {
-							unrecoverableFailures.add(new DiagnosticRun(diagnostic, finalResult));
-						}
-					}
-				} catch (NoResultException e) {
-					alertService.alertDiagnostic(system, diagnostic, result,
-							EnumDiagnosticAttempt.CORRECTION_UNAVAILABLE);
-					unrecoverableFailures.add(new DiagnosticRun(diagnostic, result));
-				}
-
+				this.manageFailure(system, diagnostic, result, skipCorrections, unrecoverableFailures, 0);
 			}
 		}
 
 		if (!unrecoverableFailures.isEmpty()) {
 			alertService.alertSystem(system, unrecoverableFailures);
 			throw new UnrecoverableDiagnosticFailureException();
+		} else {
+			system.executeIfOperational();
 		}
+	}
+
+	/**
+	 * Manage a failure.
+	 * 
+	 * @param system
+	 *            system
+	 * @param diagnostic
+	 *            diagnostic
+	 * @param result
+	 *            diagnostic result
+	 * @param skipCorrections
+	 *            true if corrections must be skipped
+	 * @param unrecoverableFailures
+	 *            list of unrecoverable failures for this system
+	 * @param nbAttempt
+	 *            number of failure management attempt
+	 * @throws UnexplainableException
+	 *             if something unexpected happens
+	 */
+	private void manageFailure(final SDBSystem system, final Diagnostic diagnostic, final DiagnosticResult result,
+			final boolean skipCorrections, final List<DiagnosticRun> unrecoverableFailures, final int nbAttempt)
+			throws UnexplainableException {
+
+		try {
+			CorrectiveAction correction = diagnostic.getCorrection(result);
+			alertService.alertDiagnostic(system, diagnostic, result, skipCorrections
+					? EnumDiagnosticAttempt.SKIP_CORRECTIONS : EnumDiagnosticAttempt.CAN_ATTEMPT_CORRECTION);
+			if (!skipCorrections) {
+				correction.attemptCorrection();
+				DiagnosticResult resultAfterCorrection = diagnostic.attemptDiagnostic();
+				alertService.alertDiagnostic(system, diagnostic, resultAfterCorrection,
+						EnumDiagnosticAttempt.CORRECTION_ATTEMPTED);
+				if (!resultAfterCorrection.getSuccess()) {
+					if (this.isUnrecoverableFailure(result, resultAfterCorrection, nbAttempt)) {
+						unrecoverableFailures.add(new DiagnosticRun(diagnostic, resultAfterCorrection));
+					} else {
+						this.manageFailure(system, diagnostic, resultAfterCorrection, skipCorrections,
+								unrecoverableFailures, nbAttempt + 1);
+					}
+				}
+
+			}
+		} catch (NoResultException e) {
+			alertService.alertDiagnostic(system, diagnostic, result, EnumDiagnosticAttempt.CORRECTION_UNAVAILABLE);
+			unrecoverableFailures.add(new DiagnosticRun(diagnostic, result));
+		}
+	}
+
+	/**
+	 * Is the result an unrecoverable failure after the correction ?
+	 * 
+	 * @param resultBeforeCorrection
+	 *            result before correction
+	 * @param resultAfterCorrection
+	 *            result after correction
+	 * @param nbAttempt
+	 *            current attempt number
+	 * @return true if this is an unrecoverable failure
+	 */
+	private boolean isUnrecoverableFailure(DiagnosticResult resultBeforeCorrection,
+			DiagnosticResult resultAfterCorrection, int nbAttempt) {
+		// We bound the number of corrective action for a given diagnostic. This
+		// is useful to break infinite loops between two type of failures.
+		if (nbAttempt >= MAX_NUMBER_ATTEMPT) {
+			return true;
+		}
+
+		// If the diagnostic result did not change after the correction, there
+		// is no point in trying anymore
+		if (StringUtils.equals(resultBeforeCorrection.getMachineMessage(), resultAfterCorrection.getMachineMessage())) {
+			return true;
+		}
+
+		return false;
 	}
 
 	static class UnrecoverableDiagnosticFailureException extends ExplainableException {
