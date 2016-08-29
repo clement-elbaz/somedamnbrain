@@ -11,12 +11,15 @@ import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.filesystem.FilesystemService;
 import com.somedamnbrain.systems.universe.UniverseSystem;
+import com.somedamnbrain.systems.universe.corrections.InitUniverseFile;
+import com.somedamnbrain.systems.universe.corrections.MoveCorruptedFile;
 
 public class ExistenceDiagnostic implements Diagnostic {
 
 	private final FilesystemService filesystem;
 
-	private final CorrectiveAction initUniverseFile;
+	private final InitUniverseFile initUniverseFile;
+	private final MoveCorruptedFile moveCorruptedFile;
 
 	/**
 	 * Constructor.
@@ -26,9 +29,11 @@ public class ExistenceDiagnostic implements Diagnostic {
 	 * @param initUniverseFile
 	 *            init universe file correction
 	 */
-	public ExistenceDiagnostic(final FilesystemService filesystem, final CorrectiveAction initUniverseFile) {
+	public ExistenceDiagnostic(final FilesystemService filesystem, final InitUniverseFile initUniverseFile,
+			final MoveCorruptedFile moveCorruptedFile) {
 		this.filesystem = filesystem;
 		this.initUniverseFile = initUniverseFile;
+		this.moveCorruptedFile = moveCorruptedFile;
 	}
 
 	/*
@@ -83,6 +88,9 @@ public class ExistenceDiagnostic implements Diagnostic {
 	public CorrectiveAction getCorrection(DiagnosticResult diagnosticResult) throws NoResultException {
 		if (StringUtils.equals("universe-existence-missing", diagnosticResult.getMachineMessage())) {
 			return this.initUniverseFile;
+		}
+		if (StringUtils.equals("universe-existence-unreadable", diagnosticResult.getMachineMessage())) {
+			return this.moveCorruptedFile;
 		}
 		throw new NoResultException();
 	}
