@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.somedamnbrain.diagnostic.Diagnostic;
+import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.universe.diagnostics.ExistenceDiagnostic;
@@ -74,7 +75,7 @@ public class UniverseSystem implements SDBSystem {
 	 * @see com.somedamnbrain.systems.SDBSystem#executeIfOperational()
 	 */
 	@Override
-	public void executeIfOperational() {
+	public void executeIfOperational() throws UnexplainableException {
 		this.universeService.configureUniverse();
 
 	}

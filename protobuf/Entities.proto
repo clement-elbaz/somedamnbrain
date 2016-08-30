@@ -10,4 +10,5 @@ message DiagnosticResult {
 	optional string human_message = 2;
 	optional string machine_message = 3;
 	optional int32 stability = 4;
+	optional string diagnostic_id = 5;
 }

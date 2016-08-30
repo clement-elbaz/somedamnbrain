@@ -58,30 +58,17 @@ public class ExistenceDiagnostic implements Diagnostic {
 	 */
 	@Override
 	public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
-		DiagnosticResult.Builder result = DiagnosticResult.newBuilder();
 		try {
 			Universe universe = Universe.parseFrom(filesystem.readFile(UniverseSystem.UNIVERSE_FILE_PATH));
 
-			result.setSuccess(true);
-			result.setMachineMessage("universe-existence-OK");
-			universeService.computeStability(this, result);
-			result.setHumanMessage("Universe file " + universe.getName() + " is present and properly formatted");
-
-			return result.build();
+			return this.newResult(true, "universe-existence-OK",
+					"Universe file " + universe.getName() + " is present and properly formatted", universeService);
 		} catch (InvalidProtocolBufferException e) {
-			result.setSuccess(false);
-			result.setMachineMessage("universe-existence-unreadable");
-			universeService.computeStability(this, result);
-			result.setHumanMessage("Universe file is not readable");
+			return this.newResult(false, "universe-existence-unreadable", "Universe file is not readable",
+					universeService);
 
-			return result.build();
 		} catch (NoResultException e) {
-			result.setSuccess(false);
-			result.setMachineMessage("universe-existence-missing");
-			universeService.computeStability(this, result);
-			result.setHumanMessage("Universe file is not present");
-
-			return result.build();
+			return this.newResult(false, "universe-existence-missing", "Universe file is not present", universeService);
 		}
 	}
 

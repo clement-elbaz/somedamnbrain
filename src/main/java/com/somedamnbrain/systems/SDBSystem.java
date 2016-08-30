@@ -3,6 +3,7 @@ package com.somedamnbrain.systems;
 import java.util.List;
 
 import com.somedamnbrain.diagnostic.Diagnostic;
+import com.somedamnbrain.exceptions.UnexplainableException;
 
 /**
  * In somedamnbrain, a system describes a piece of infrastructure. A system
@@ -42,7 +43,10 @@ public interface SDBSystem {
 	 * This method is called after the full diagnostic of the system, if and
 	 * only if the system is operational. That if, no unrecoverable failures
 	 * were encountered during the diagnostic run.
+	 * 
+	 * @throws UnexplainableException
+	 *             if something unexpected happened
 	 */
-	void executeIfOperational();
+	void executeIfOperational() throws UnexplainableException;
 
 }
