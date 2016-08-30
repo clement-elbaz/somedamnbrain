@@ -6,8 +6,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import javax.inject.Singleton;
+
 import com.somedamnbrain.systems.SDBSystem;
 
+@Singleton
 public class SystemSelectorService {
 	/**
 	 * Once a system is fully diagnosticated, it goes here so it can't be
@@ -37,6 +40,7 @@ public class SystemSelectorService {
 			// methods.
 			final LinkedList<SDBSystem> orderedSystems = new LinkedList<SDBSystem>();
 
+			this.addSystemToList(rootSystem, orderedSystems, seenSystems);
 			this.recursiveManageSystem(rootSystem, orderedSystems, seenSystems);
 
 			// The systems which need to be diagnosticated first are now at the

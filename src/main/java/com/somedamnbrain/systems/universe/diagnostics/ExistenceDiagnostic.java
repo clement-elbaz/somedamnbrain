@@ -2,6 +2,7 @@ package com.somedamnbrain.systems.universe.diagnostics;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.inject.Inject;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
@@ -29,6 +30,7 @@ public class ExistenceDiagnostic implements Diagnostic {
 	 * @param initUniverseFile
 	 *            init universe file correction
 	 */
+	@Inject
 	public ExistenceDiagnostic(final FilesystemService filesystem, final InitUniverseFile initUniverseFile,
 			final MoveCorruptedFile moveCorruptedFile) {
 		this.filesystem = filesystem;

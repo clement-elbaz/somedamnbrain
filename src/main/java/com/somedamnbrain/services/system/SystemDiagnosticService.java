@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.diagnostic.DiagnosticRun;
@@ -24,6 +25,7 @@ public class SystemDiagnosticService {
 	private final AlertService alertService;
 	private final SystemSelectorService selectorService;
 
+	@Inject
 	public SystemDiagnosticService(final AlertService alertService, final SystemSelectorService selectorService) {
 		this.alertService = alertService;
 		this.selectorService = selectorService;
@@ -72,6 +74,8 @@ public class SystemDiagnosticService {
 		List<DiagnosticRun> unrecoverableFailures = new ArrayList<DiagnosticRun>();
 
 		for (Diagnostic diagnostic : system.getDiagnostics()) {
+			// TODO big question : should we catch Exception when calling
+			// attemptDiagnostic and attemptCorrection ?
 			DiagnosticResult result = diagnostic.attemptDiagnostic();
 			if (!result.getSuccess()) {
 				this.manageFailure(system, diagnostic, result, skipCorrections, unrecoverableFailures, 0);
@@ -107,7 +111,8 @@ public class SystemDiagnosticService {
 	private void manageFailure(final SDBSystem system, final Diagnostic diagnostic, final DiagnosticResult result,
 			final boolean skipCorrections, final List<DiagnosticRun> unrecoverableFailures, final int nbAttempt)
 			throws UnexplainableException {
-
+		// TODO big question : should we catch Exception when calling
+		// attemptDiagnostic and attemptCorrection ?
 		try {
 			CorrectiveAction correction = diagnostic.getCorrection(result);
 			alertService.alertDiagnostic(system, diagnostic, result, skipCorrections

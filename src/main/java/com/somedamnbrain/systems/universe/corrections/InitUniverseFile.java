@@ -1,5 +1,6 @@
 package com.somedamnbrain.systems.universe.corrections;
 
+import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.entities.Entities.Universe;
 import com.somedamnbrain.exceptions.UnexplainableException;
@@ -12,6 +13,7 @@ public class InitUniverseFile implements CorrectiveAction {
 	private final FilesystemService filesystem;
 	private final AskService askService;
 
+	@Inject
 	public InitUniverseFile(final FilesystemService filesystem, final AskService askService) {
 		this.filesystem = filesystem;
 		this.askService = askService;

@@ -1,10 +1,14 @@
 package com.somedamnbrain.systems.universe;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.systems.SDBSystem;
+import com.somedamnbrain.systems.universe.diagnostics.ExistenceDiagnostic;
 
 /**
  * In somedamnbrain, the Universe system take care of the Universe file and its
@@ -17,9 +21,20 @@ import com.somedamnbrain.systems.SDBSystem;
  * @author clement
  *
  */
+@Singleton
 public class UniverseSystem implements SDBSystem {
 	/** Path to the universe file. */
 	public static final String UNIVERSE_FILE_PATH = "~/.somedamnbrain-universe";
+
+	private final ExistenceDiagnostic existenceDiagnostic;
+
+	private boolean configured;
+
+	@Inject
+	public UniverseSystem(final ExistenceDiagnostic existenceDiagnostic) {
+		this.existenceDiagnostic = existenceDiagnostic;
+		this.configured = false;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -49,8 +64,7 @@ public class UniverseSystem implements SDBSystem {
 	 */
 	@Override
 	public List<Diagnostic> getDiagnostics() {
-		// TODO Auto-generated method stub
-		return null;
+		return Arrays.asList(existenceDiagnostic);
 	}
 
 	/*
@@ -60,8 +74,12 @@ public class UniverseSystem implements SDBSystem {
 	 */
 	@Override
 	public void executeIfOperational() {
-		// TODO Auto-generated method stub
+		this.configured = true;
 
+	}
+
+	public boolean isConfigured() {
+		return configured;
 	}
 
 }

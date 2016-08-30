@@ -9,6 +9,6 @@ public interface FilesystemService {
 
 	void writeFile(final String path, final byte[] content) throws UnexplainableException;
 
-	void moveFile(String universeFilePath, String string) throws UnexplainableException;
+	void moveFile(String originalPath, String newPath) throws NoResultException, UnexplainableException;
 
 }
