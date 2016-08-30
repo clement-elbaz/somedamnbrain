@@ -9,6 +9,8 @@ public class ReportService {
 	public void reportDiagnosticResult(final Diagnostic diagnostic, final DiagnosticResult result,
 			boolean willTryCorrection) {
 		// launch an alert if stability is 0 <-- the system just changed state !
+		// => With one exception, if this is the first execution of the
+		// universe, we only alert for failed diagnostic
 		// launch an alert if a correction will be tried
 		// launch an alert if this result was preceded by a correction attempt
 
