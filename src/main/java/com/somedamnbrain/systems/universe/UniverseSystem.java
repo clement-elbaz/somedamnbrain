@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.somedamnbrain.diagnostic.Diagnostic;
+import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.universe.diagnostics.ExistenceDiagnostic;
 
@@ -28,12 +29,12 @@ public class UniverseSystem implements SDBSystem {
 
 	private final ExistenceDiagnostic existenceDiagnostic;
 
-	private boolean configured;
+	private final UniverseService universeService;
 
 	@Inject
-	public UniverseSystem(final ExistenceDiagnostic existenceDiagnostic) {
+	public UniverseSystem(final ExistenceDiagnostic existenceDiagnostic, final UniverseService universeService) {
 		this.existenceDiagnostic = existenceDiagnostic;
-		this.configured = false;
+		this.universeService = universeService;
 	}
 
 	/*
@@ -74,12 +75,8 @@ public class UniverseSystem implements SDBSystem {
 	 */
 	@Override
 	public void executeIfOperational() {
-		this.configured = true;
+		this.universeService.configureUniverse();
 
-	}
-
-	public boolean isConfigured() {
-		return configured;
 	}
 
 }

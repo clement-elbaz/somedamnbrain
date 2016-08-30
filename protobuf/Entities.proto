@@ -2,10 +2,12 @@ package com.somedamnbrain.entities;
 
 message Universe {
 	optional string name = 1;
+	repeated DiagnosticResult diagnostics = 2;
 }
 
 message DiagnosticResult {
 	optional bool success = 1; 
 	optional string human_message = 2;
 	optional string machine_message = 3;
+	optional int32 stability = 4;
 }

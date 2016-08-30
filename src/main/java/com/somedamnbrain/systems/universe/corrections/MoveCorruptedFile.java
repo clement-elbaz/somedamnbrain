@@ -34,4 +34,9 @@ public class MoveCorruptedFile implements CorrectiveAction {
 
 	}
 
+	@Override
+	public String getUniqueID() {
+		return "Moving corrupted Universe file";
+	}
+
 }

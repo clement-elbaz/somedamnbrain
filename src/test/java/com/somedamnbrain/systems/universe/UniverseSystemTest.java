@@ -13,6 +13,7 @@ import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.ask.AskService;
 import com.somedamnbrain.services.filesystem.FilesystemService;
 import com.somedamnbrain.services.system.SystemDiagnosticService;
+import com.somedamnbrain.services.universe.UniverseService;
 
 public class UniverseSystemTest {
 
@@ -37,9 +38,10 @@ public class UniverseSystemTest {
 
 		SystemDiagnosticService diagnosticService = injector.getInstance(SystemDiagnosticService.class);
 		UniverseSystem system = injector.getInstance(UniverseSystem.class);
+		UniverseService service = injector.getInstance(UniverseService.class);
 
 		diagnosticService.diagnosticFullSystem(system);
-		Assert.assertTrue(system.isConfigured());
+		Assert.assertTrue(service.isConfigured());
 	}
 
 	@Test
@@ -49,11 +51,12 @@ public class UniverseSystemTest {
 		FilesystemService filesystem = injector.getInstance(FilesystemService.class);
 		SystemDiagnosticService diagnosticService = injector.getInstance(SystemDiagnosticService.class);
 		UniverseSystem system = injector.getInstance(UniverseSystem.class);
+		UniverseService service = injector.getInstance(UniverseService.class);
 
 		filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, "some corrupted data".getBytes());
 
 		diagnosticService.diagnosticFullSystem(system);
-		Assert.assertTrue(system.isConfigured());
+		Assert.assertTrue(service.isConfigured());
 	}
 
 	@Test
@@ -63,6 +66,7 @@ public class UniverseSystemTest {
 		FilesystemService filesystem = injector.getInstance(FilesystemService.class);
 		SystemDiagnosticService diagnosticService = injector.getInstance(SystemDiagnosticService.class);
 		UniverseSystem system = injector.getInstance(UniverseSystem.class);
+		UniverseService service = injector.getInstance(UniverseService.class);
 
 		Universe.Builder universe = Universe.newBuilder();
 
@@ -71,7 +75,7 @@ public class UniverseSystemTest {
 		filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, universe.build().toByteArray());
 
 		diagnosticService.diagnosticFullSystem(system);
-		Assert.assertTrue(system.isConfigured());
+		Assert.assertTrue(service.isConfigured());
 	}
 
 	static class DumbAskService implements AskService {

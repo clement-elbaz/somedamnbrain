@@ -34,4 +34,9 @@ public class InitUniverseFile implements CorrectiveAction {
 		return blankUniverse.build();
 	}
 
+	@Override
+	public String getUniqueID() {
+		return "Creating new Universe file";
+	}
+
 }

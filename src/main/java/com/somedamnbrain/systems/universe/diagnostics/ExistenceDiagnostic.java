@@ -11,6 +11,7 @@ import com.somedamnbrain.entities.Entities.Universe;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.filesystem.FilesystemService;
+import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.universe.UniverseSystem;
 import com.somedamnbrain.systems.universe.corrections.InitUniverseFile;
 import com.somedamnbrain.systems.universe.corrections.MoveCorruptedFile;
@@ -18,6 +19,7 @@ import com.somedamnbrain.systems.universe.corrections.MoveCorruptedFile;
 public class ExistenceDiagnostic implements Diagnostic {
 
 	private final FilesystemService filesystem;
+	private final UniverseService universeService;
 
 	private final InitUniverseFile initUniverseFile;
 	private final MoveCorruptedFile moveCorruptedFile;
@@ -31,9 +33,10 @@ public class ExistenceDiagnostic implements Diagnostic {
 	 *            init universe file correction
 	 */
 	@Inject
-	public ExistenceDiagnostic(final FilesystemService filesystem, final InitUniverseFile initUniverseFile,
-			final MoveCorruptedFile moveCorruptedFile) {
+	public ExistenceDiagnostic(final FilesystemService filesystem, final UniverseService universeService,
+			final InitUniverseFile initUniverseFile, final MoveCorruptedFile moveCorruptedFile) {
 		this.filesystem = filesystem;
+		this.universeService = universeService;
 		this.initUniverseFile = initUniverseFile;
 		this.moveCorruptedFile = moveCorruptedFile;
 	}
@@ -61,18 +64,21 @@ public class ExistenceDiagnostic implements Diagnostic {
 
 			result.setSuccess(true);
 			result.setMachineMessage("universe-existence-OK");
+			universeService.computeStability(this, result);
 			result.setHumanMessage("Universe file " + universe.getName() + " is present and properly formatted");
 
 			return result.build();
 		} catch (InvalidProtocolBufferException e) {
 			result.setSuccess(false);
 			result.setMachineMessage("universe-existence-unreadable");
+			universeService.computeStability(this, result);
 			result.setHumanMessage("Universe file is not readable");
 
 			return result.build();
 		} catch (NoResultException e) {
 			result.setSuccess(false);
 			result.setMachineMessage("universe-existence-missing");
+			universeService.computeStability(this, result);
 			result.setHumanMessage("Universe file is not present");
 
 			return result.build();
