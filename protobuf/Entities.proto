@@ -3,6 +3,7 @@ package com.somedamnbrain.entities;
 message Universe {
 	optional string name = 1;
 	repeated DiagnosticResult diagnostics = 2;
+	optional int32 previous_execution_number = 3;
 }
 
 message DiagnosticResult {

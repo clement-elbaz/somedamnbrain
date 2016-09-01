@@ -23,12 +23,15 @@ public class UniverseService {
 	private boolean configured;
 	private Universe universePreviousIteration;
 
-	private Map<String, DiagnosticResult> previousDiagnostics;
+	private final Map<String, DiagnosticResult> previousDiagnostics;
+
+	private final Map<String, DiagnosticResult> currentDiagnostics;
 
 	@Inject
 	public UniverseService(final FilesystemService filesystem) {
 		this.filesystem = filesystem;
 		this.previousDiagnostics = new HashMap<String, DiagnosticResult>();
+		this.currentDiagnostics = new HashMap<String, DiagnosticResult>();
 	}
 
 	/**
@@ -63,7 +66,14 @@ public class UniverseService {
 		if (!this.configured) {
 			throw new SystemNotAvailableException();
 		}
-		throw new RuntimeException("not implemented");
+		this.currentDiagnostics.put(diagnostic.getUniqueID(), result);
+	}
+
+	public int getCurrentExecutionNumber() throws SystemNotAvailableException {
+		if (!this.configured) {
+			throw new SystemNotAvailableException();
+		}
+		return this.universePreviousIteration.getPreviousExecutionNumber() + 1;
 	}
 
 	public int computeStability(Diagnostic diagnostic, String machineMessage) {
