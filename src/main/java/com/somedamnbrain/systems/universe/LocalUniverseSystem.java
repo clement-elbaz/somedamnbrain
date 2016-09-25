@@ -45,7 +45,7 @@ public class LocalUniverseSystem implements SDBSystem {
 	 */
 	@Override
 	public String getUniqueID() {
-		return "Universe";
+		return "LocalUniverse";
 	}
 
 	/*
