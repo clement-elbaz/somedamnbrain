@@ -94,5 +94,11 @@ public class UniverseSystemTest {
 			return true;
 		}
 
+		@Override
+		public void close() {
+			// do nothing
+
+		}
+
 	}
 }

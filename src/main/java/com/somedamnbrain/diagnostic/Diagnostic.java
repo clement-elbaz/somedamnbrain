@@ -1,9 +1,13 @@
 package com.somedamnbrain.diagnostic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.systems.SDBSystem;
 
 /**
  * In somedamnbrain, a diagnostic is a monitoring action on a system. Diagnostic
@@ -62,6 +66,43 @@ public interface Diagnostic {
 		result.setStability(universeService.computeStability(this, machineMessage));
 		result.setDiagnosticId(this.getUniqueID());
 		return result.build();
+	}
+
+	/**
+	 * A generic static method allowing to quickly provide a failing "not
+	 * implemented" diagnostic for a system.
+	 * 
+	 * @param system
+	 *            system
+	 * @param universeService
+	 *            universe service
+	 * @return a list of diagnostic containing one failing "not implemented"
+	 *         diagnostic.
+	 */
+	public static List<Diagnostic> notImplemented(SDBSystem system, UniverseService universeService) {
+		List<Diagnostic> result = new ArrayList<Diagnostic>();
+
+		result.add(new Diagnostic() {
+
+			@Override
+			public String getUniqueID() {
+				return system.getUniqueID() + "-diagnostic-not-implemented";
+			}
+
+			@Override
+			public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
+				return this.newResult(false, "not-implemented", "No diagnostic implemented for this system",
+						universeService);
+			}
+
+			@Override
+			public CorrectiveAction getCorrection(DiagnosticResult diagnosticResult) throws NoResultException {
+				throw new NoResultException();
+			}
+
+		});
+
+		return result;
 	}
 
 }

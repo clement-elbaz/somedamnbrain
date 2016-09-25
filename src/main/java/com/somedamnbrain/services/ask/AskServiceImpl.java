@@ -55,4 +55,15 @@ public class AskServiceImpl implements AskService {
 		}
 	}
 
+	@Override
+	public void close() throws UnexplainableException {
+		try {
+			this.bufferedIn.close();
+			this.simpleIn.close();
+		} catch (Exception e) {
+			throw new UnexplainableException(e);
+		}
+
+	}
+
 }

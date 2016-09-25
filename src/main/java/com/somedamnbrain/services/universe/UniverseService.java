@@ -94,6 +94,26 @@ public class UniverseService {
 
 	}
 
+	public void closeAndSaveUniverse() throws SystemNotAvailableException, UnexplainableException {
+		if (!this.configured) {
+			throw new SystemNotAvailableException();
+		}
+		Universe.Builder modifiedUniverse = Universe.newBuilder();
+
+		modifiedUniverse.setName(universePreviousIteration.getName());
+		modifiedUniverse.addAllDiagnostics(this.currentDiagnostics.values());
+		modifiedUniverse.setPreviousExecutionNumber(universePreviousIteration.getPreviousExecutionNumber() + 1);
+
+		Universe finalizedUniverse = modifiedUniverse.build();
+
+		// TODO report global stability and failed systems
+
+		// TODO report sustainability of universe
+
+		this.filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, finalizedUniverse.toByteArray());
+		this.configured = false;
+	}
+
 	public boolean isConfigured() {
 		return configured;
 	}

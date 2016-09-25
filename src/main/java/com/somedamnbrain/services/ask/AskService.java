@@ -14,6 +14,14 @@ public interface AskService {
 	boolean initialize() throws UnexplainableException;
 
 	/**
+	 * Close the Ask Service.
+	 * 
+	 * @throws UnexplainableException
+	 *             if something unexpected happened.
+	 */
+	void close() throws UnexplainableException;
+
+	/**
 	 * Ask a question to a human minion.
 	 * 
 	 * @param question
