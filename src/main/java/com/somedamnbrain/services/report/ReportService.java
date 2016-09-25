@@ -1,5 +1,7 @@
 package com.somedamnbrain.services.report;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
@@ -58,8 +60,12 @@ public class ReportService {
 	}
 
 	private void displayReportOnConsole(final Report report) {
+		System.out.println("=======================================");
 		System.out.println("REPORT - " + report.getSubject());
 		System.out.println(report.getContent());
+		System.out.println(StringUtils.EMPTY);
+		System.out.println(StringUtils.EMPTY);
+		System.out.println("=======================================");
 
 	}
 
@@ -74,7 +80,7 @@ public class ReportService {
 		}
 
 		final StringBuilder content = this.initiateContent(rootSystem, currentSystem);
-		content.append("Diagnostic " + diagnostic.getUniqueID() + " is ");
+		content.append("Diagnostic \"" + diagnostic.getUniqueID() + "\" is ");
 		if (result.getSuccess()) {
 			content.append("OK");
 		} else {

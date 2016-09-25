@@ -10,51 +10,52 @@ import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.diagnostic.DiagnosticRun;
-import com.somedamnbrain.diagnostic.EnumDiagnosticAttempt;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.ExplainableException;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.alert.OldAlertService;
+import com.somedamnbrain.services.report.ReportService;
 import com.somedamnbrain.systems.SDBSystem;
 
 public class SystemDiagnosticService {
 
 	private final static int MAX_NUMBER_ATTEMPT = 50;
 
-	private final OldAlertService alertService;
+	private final ReportService reportService;
 	private final SystemSelectorService selectorService;
 
 	@Inject
-	public SystemDiagnosticService(final OldAlertService alertService, final SystemSelectorService selectorService) {
-		this.alertService = alertService;
+	public SystemDiagnosticService(final ReportService reportService, final SystemSelectorService selectorService) {
+		this.reportService = reportService;
 		this.selectorService = selectorService;
 	}
 
 	/**
 	 * Run a full diagnostic of a system.
 	 * 
-	 * @param system
+	 * @param rootSystem
 	 *            system.
 	 * @throws UnexplainableException
 	 *             if an unexpected sdb failure occured
 	 */
-	public void diagnosticFullSystem(SDBSystem system) throws UnexplainableException {
+	public void diagnosticFullSystem(final SDBSystem rootSystem) throws UnexplainableException {
 		boolean skipCorrections = false;
 
-		Iterator<SDBSystem> iterator = selectorService.computeDependenciesResolution(system);
+		final Iterator<SDBSystem> iterator = selectorService.computeDependenciesResolution(rootSystem);
 
 		while (iterator.hasNext()) {
-			SDBSystem currentSystem = iterator.next();
+			final SDBSystem currentSystem = iterator.next();
 			try {
-				this.diagnosticSingleSystem(currentSystem, skipCorrections);
-			} catch (UnrecoverableDiagnosticFailureException e) {
+				this.diagnosticSingleSystem(currentSystem, rootSystem, skipCorrections);
+			} catch (final UnrecoverableDiagnosticFailureException e) {
 				// If a system has a unrecoverable failure, we pursue diagnostic
 				// but do not attempt any more correction on other systems.
 				skipCorrections = true;
 			}
 			selectorService.markSystemAsDiagnosticated(currentSystem);
 		}
+
+		// TODO report full system
 	}
 
 	/**
@@ -62,6 +63,8 @@ public class SystemDiagnosticService {
 	 * 
 	 * @param system
 	 *            system to run diagnostic on
+	 * @param rootSystem
+	 *            root system
 	 * @param skipCorrections
 	 *            true if not correction should be attempted
 	 * @throws UnrecoverableDiagnosticFailureException
@@ -69,21 +72,23 @@ public class SystemDiagnosticService {
 	 * @throws UnexplainableException
 	 *             if an unexpected SDB failure occured
 	 */
-	private void diagnosticSingleSystem(SDBSystem system, boolean skipCorrections)
-			throws UnrecoverableDiagnosticFailureException, UnexplainableException {
-		List<DiagnosticRun> unrecoverableFailures = new ArrayList<DiagnosticRun>();
+	private void diagnosticSingleSystem(final SDBSystem system, final SDBSystem rootSystem,
+			final boolean skipCorrections) throws UnrecoverableDiagnosticFailureException, UnexplainableException {
+		final List<DiagnosticRun> unrecoverableFailures = new ArrayList<DiagnosticRun>();
 
-		for (Diagnostic diagnostic : system.getDiagnostics()) {
+		for (final Diagnostic diagnostic : system.getDiagnostics()) {
 			// TODO big question : should we catch Exception when calling
 			// attemptDiagnostic and attemptCorrection ?
-			DiagnosticResult result = diagnostic.attemptDiagnostic();
+			final DiagnosticResult result = diagnostic.attemptDiagnostic();
+			this.reportService.reportDiagnosticResult(rootSystem, system, diagnostic, result);
 			if (!result.getSuccess()) {
-				this.manageFailure(system, diagnostic, result, skipCorrections, unrecoverableFailures, 0);
+				this.manageFailure(rootSystem, system, diagnostic, result, skipCorrections, unrecoverableFailures, 0);
 			}
 		}
 
+		// TODO report single system
+
 		if (!unrecoverableFailures.isEmpty()) {
-			alertService.alertSystem(system, unrecoverableFailures);
 			throw new UnrecoverableDiagnosticFailureException();
 		} else {
 			system.executeIfOperational();
@@ -93,6 +98,8 @@ public class SystemDiagnosticService {
 	/**
 	 * Manage a failure.
 	 * 
+	 * @param rootSystem
+	 *            root system
 	 * @param system
 	 *            system
 	 * @param diagnostic
@@ -108,32 +115,28 @@ public class SystemDiagnosticService {
 	 * @throws UnexplainableException
 	 *             if something unexpected happens
 	 */
-	private void manageFailure(final SDBSystem system, final Diagnostic diagnostic, final DiagnosticResult result,
-			final boolean skipCorrections, final List<DiagnosticRun> unrecoverableFailures, final int nbAttempt)
-			throws UnexplainableException {
+	private void manageFailure(final SDBSystem rootSystem, final SDBSystem system, final Diagnostic diagnostic,
+			final DiagnosticResult result, final boolean skipCorrections,
+			final List<DiagnosticRun> unrecoverableFailures, final int nbAttempt) throws UnexplainableException {
 		// TODO big question : should we catch Exception when calling
 		// attemptDiagnostic and attemptCorrection ?
 		try {
-			CorrectiveAction correction = diagnostic.getCorrection(result);
-			alertService.alertDiagnostic(system, diagnostic, result, skipCorrections
-					? EnumDiagnosticAttempt.SKIP_CORRECTIONS : EnumDiagnosticAttempt.CAN_ATTEMPT_CORRECTION);
+			final CorrectiveAction correction = diagnostic.getCorrection(result);
 			if (!skipCorrections) {
+				this.reportService.reportCorrectionAttempt(rootSystem, system, diagnostic, correction);
 				correction.attemptCorrection();
-				DiagnosticResult resultAfterCorrection = diagnostic.attemptDiagnostic();
-				alertService.alertDiagnostic(system, diagnostic, resultAfterCorrection,
-						EnumDiagnosticAttempt.CORRECTION_ATTEMPTED);
+				final DiagnosticResult resultAfterCorrection = diagnostic.attemptDiagnostic();
 				if (!resultAfterCorrection.getSuccess()) {
 					if (this.isUnrecoverableFailure(result, resultAfterCorrection, nbAttempt)) {
 						unrecoverableFailures.add(new DiagnosticRun(diagnostic, resultAfterCorrection));
 					} else {
-						this.manageFailure(system, diagnostic, resultAfterCorrection, skipCorrections,
+						this.manageFailure(rootSystem, system, diagnostic, resultAfterCorrection, skipCorrections,
 								unrecoverableFailures, nbAttempt + 1);
 					}
 				}
 
 			}
-		} catch (NoResultException e) {
-			alertService.alertDiagnostic(system, diagnostic, result, EnumDiagnosticAttempt.CORRECTION_UNAVAILABLE);
+		} catch (final NoResultException e) {
 			unrecoverableFailures.add(new DiagnosticRun(diagnostic, result));
 		}
 	}
@@ -149,8 +152,8 @@ public class SystemDiagnosticService {
 	 *            current attempt number
 	 * @return true if this is an unrecoverable failure
 	 */
-	private boolean isUnrecoverableFailure(DiagnosticResult resultBeforeCorrection,
-			DiagnosticResult resultAfterCorrection, int nbAttempt) {
+	private boolean isUnrecoverableFailure(final DiagnosticResult resultBeforeCorrection,
+			final DiagnosticResult resultAfterCorrection, final int nbAttempt) {
 		// We bound the number of corrective action for a given diagnostic. This
 		// is useful to break infinite loops between two type of failures.
 		if (nbAttempt >= MAX_NUMBER_ATTEMPT) {
