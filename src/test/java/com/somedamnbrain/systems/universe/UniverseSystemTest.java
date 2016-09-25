@@ -89,5 +89,10 @@ public class UniverseSystemTest {
 			return "I don't know !";
 		}
 
+		@Override
+		public boolean initialize() {
+			return true;
+		}
+
 	}
 }

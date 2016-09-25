@@ -3,6 +3,7 @@ package com.somedamnbrain.systems.universe.corrections;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.entities.Entities.Universe;
+import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.ask.AskService;
 import com.somedamnbrain.services.filesystem.FilesystemService;
@@ -21,12 +22,16 @@ public class InitUniverseFile implements CorrectiveAction {
 
 	@Override
 	public void attemptCorrection() throws UnexplainableException {
-		Universe blankUniverse = this.generateBlankUniverse();
-		this.filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, blankUniverse.toByteArray());
+		try {
+			Universe blankUniverse = this.generateBlankUniverse();
+			this.filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, blankUniverse.toByteArray());
+		} catch (SystemNotAvailableException e) {
+			// do nothing, there is nothing we can do.
+		}
 
 	}
 
-	private Universe generateBlankUniverse() {
+	private Universe generateBlankUniverse() throws SystemNotAvailableException, UnexplainableException {
 		Universe.Builder blankUniverse = Universe.newBuilder();
 
 		blankUniverse.setName(askService.askHumanMinion("What is the name of this new Universe ?"));
