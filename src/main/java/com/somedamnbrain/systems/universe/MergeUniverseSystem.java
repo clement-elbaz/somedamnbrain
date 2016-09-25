@@ -3,6 +3,7 @@ package com.somedamnbrain.systems.universe;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
