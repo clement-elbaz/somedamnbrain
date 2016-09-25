@@ -27,7 +27,7 @@ import com.somedamnbrain.systems.universe.diagnostics.ExistenceDiagnostic;
 @Singleton
 public class LocalUniverseSystem extends AbstractSystem {
 	/** Path to the universe file. */
-	public static final String UNIVERSE_FILE_PATH = "~/.somedamnbrain-universe";
+	public static final String UNIVERSE_FILE_PATH = System.getProperty("user.home") + "/.somedamnbrain-universe";
 
 	private final ExistenceDiagnostic existenceDiagnostic;
 
