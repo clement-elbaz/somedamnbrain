@@ -11,8 +11,12 @@ public class UnexplainableException extends Exception {
 		super();
 	}
 
-	public UnexplainableException(Exception e) {
+	public UnexplainableException(final Exception e) {
 		super(e);
+	}
+
+	public UnexplainableException(final String errorMessage) {
+		super(errorMessage);
 	}
 
 }

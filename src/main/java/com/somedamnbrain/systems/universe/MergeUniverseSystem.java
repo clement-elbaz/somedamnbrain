@@ -7,10 +7,11 @@ import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.ssh.SSHSystem;
 
-public class MergeUniverseSystem implements SDBSystem {
+public class MergeUniverseSystem extends AbstractSystem {
 
 	private final LocalUniverseSystem universeSystem;
 

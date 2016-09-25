@@ -7,10 +7,11 @@ import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.machine.MachineSystem;
 
-public class JavaSystem implements SDBSystem {
+public class JavaSystem extends AbstractSystem {
 
 	private final MachineSystem machineSystem;
 

@@ -7,11 +7,12 @@ import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.git.GitSystem;
 import com.somedamnbrain.systems.maven.MavenSystem;
 
-public class SDBSourceCodeSystem implements SDBSystem {
+public class SDBSourceCodeSystem extends AbstractSystem {
 
 	private final GitSystem gitSystem;
 

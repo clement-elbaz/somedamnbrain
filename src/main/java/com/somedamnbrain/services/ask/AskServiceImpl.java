@@ -4,14 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import com.google.inject.Singleton;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 
+@Singleton
 public class AskServiceImpl implements AskService {
 
 	private boolean isAnyoneThere;
-	private InputStreamReader simpleIn;
-	private BufferedReader bufferedIn;
+	private final InputStreamReader simpleIn;
+	private final BufferedReader bufferedIn;
 
 	public AskServiceImpl() {
 		this.isAnyoneThere = false;
@@ -34,7 +36,7 @@ public class AskServiceImpl implements AskService {
 					break;
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			this.isAnyoneThere = false;
 			throw new UnexplainableException(e);
 		}
@@ -43,14 +45,14 @@ public class AskServiceImpl implements AskService {
 	}
 
 	@Override
-	public String askHumanMinion(String question) throws SystemNotAvailableException, UnexplainableException {
+	public String askHumanMinion(final String question) throws SystemNotAvailableException, UnexplainableException {
 		if (!this.isAnyoneThere) {
 			throw new SystemNotAvailableException();
 		}
 		System.out.println("I have a question for you, human minion ! " + question);
 		try {
 			return bufferedIn.readLine();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new UnexplainableException(e);
 		}
 	}
@@ -60,7 +62,7 @@ public class AskServiceImpl implements AskService {
 		try {
 			this.bufferedIn.close();
 			this.simpleIn.close();
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new UnexplainableException(e);
 		}
 

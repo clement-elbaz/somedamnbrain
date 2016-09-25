@@ -1,6 +1,16 @@
 package com.somedamnbrain.exceptions;
 
+import java.io.FileNotFoundException;
+
 public class NoResultException extends ExplainableException {
+
+	public NoResultException() {
+		super();
+	}
+
+	public NoResultException(final FileNotFoundException e) {
+		super(e);
+	}
 
 	/**
 	 * 

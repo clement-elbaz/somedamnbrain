@@ -7,10 +7,11 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
+import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.nextexec.SDBNextExecutionSystem;
 
-public class SelfSystem implements SDBSystem {
+public class SelfSystem extends AbstractSystem {
 
 	private final SDBNextExecutionSystem nextExecutionSystem;
 

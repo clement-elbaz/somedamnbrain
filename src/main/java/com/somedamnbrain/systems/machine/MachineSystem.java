@@ -7,10 +7,11 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
+import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.universe.MergeUniverseSystem;
 
-public class MachineSystem implements SDBSystem {
+public class MachineSystem extends AbstractSystem {
 
 	private final MergeUniverseSystem mergeUniverseSystem;
 
