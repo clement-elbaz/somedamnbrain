@@ -5,6 +5,7 @@ import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
+import com.somedamnbrain.services.alert.AlertService;
 import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
 
@@ -12,9 +13,12 @@ public class ReportService {
 
 	private final UniverseService universeService;
 
+	private final AlertService alertService;
+
 	@Inject
-	public ReportService(final UniverseService universeService) {
+	public ReportService(final UniverseService universeService, final AlertService alertService) {
 		this.universeService = universeService;
+		this.alertService = alertService;
 	}
 
 	public void reportDiagnosticResult(final SDBSystem rootSystem, final SDBSystem currentSystem,
@@ -46,7 +50,7 @@ public class ReportService {
 				previousCorrectionAttempt);
 
 		if (shouldAlert) {
-			// TODO promote report to alert
+			this.alertService.promoteReportToAlert(report);
 		} else {
 			this.displayReportOnConsole(report);
 		}
@@ -145,7 +149,7 @@ public class ReportService {
 
 		final Report report = new Report(subject.toString(), content.toString());
 
-		// TODO promote to alert
+		this.alertService.promoteReportToAlert(report);
 
 	}
 
@@ -162,7 +166,7 @@ public class ReportService {
 
 		final Report report = new Report(subject.toString(), content.toString());
 
-		// TODO promote to alert
+		this.alertService.promoteReportToAlert(report);
 	}
 
 	public void reportCrash(final Exception e) {
@@ -175,7 +179,7 @@ public class ReportService {
 
 		final Report report = new Report("Somedamnbrain - A crash occured !", content.toString());
 
-		// TODO promote to alert
+		this.alertService.promoteReportToAlert(report);
 	}
 
 }
