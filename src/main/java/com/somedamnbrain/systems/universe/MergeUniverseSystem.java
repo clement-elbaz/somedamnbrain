@@ -17,6 +17,7 @@ public class MergeUniverseSystem implements SDBSystem {
 
 	private final UniverseService universeService;
 
+	@Inject
 	public MergeUniverseSystem(final LocalUniverseSystem universeSystem, final SSHSystem sshSystem,
 			final UniverseService universeService) {
 		this.universeSystem = universeSystem;
