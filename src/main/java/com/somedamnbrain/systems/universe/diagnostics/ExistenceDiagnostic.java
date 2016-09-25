@@ -12,7 +12,7 @@ import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.filesystem.FilesystemService;
 import com.somedamnbrain.services.universe.UniverseService;
-import com.somedamnbrain.systems.universe.UniverseSystem;
+import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 import com.somedamnbrain.systems.universe.corrections.InitUniverseFile;
 import com.somedamnbrain.systems.universe.corrections.MoveCorruptedFile;
 
@@ -59,7 +59,7 @@ public class ExistenceDiagnostic implements Diagnostic {
 	@Override
 	public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
 		try {
-			Universe universe = Universe.parseFrom(filesystem.readFile(UniverseSystem.UNIVERSE_FILE_PATH));
+			Universe universe = Universe.parseFrom(filesystem.readFile(LocalUniverseSystem.UNIVERSE_FILE_PATH));
 
 			return this.newResult(true, "universe-existence-OK",
 					"Universe file " + universe.getName() + " is present and properly formatted", universeService);

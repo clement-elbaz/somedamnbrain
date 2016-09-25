@@ -7,7 +7,7 @@ import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.ask.AskService;
 import com.somedamnbrain.services.filesystem.FilesystemService;
-import com.somedamnbrain.systems.universe.UniverseSystem;
+import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 
 public class InitUniverseFile implements CorrectiveAction {
 
@@ -24,7 +24,7 @@ public class InitUniverseFile implements CorrectiveAction {
 	public void attemptCorrection() throws UnexplainableException {
 		try {
 			Universe blankUniverse = this.generateBlankUniverse();
-			this.filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, blankUniverse.toByteArray());
+			this.filesystem.writeFile(LocalUniverseSystem.UNIVERSE_FILE_PATH, blankUniverse.toByteArray());
 		} catch (SystemNotAvailableException e) {
 			// do nothing, there is nothing we can do.
 		}

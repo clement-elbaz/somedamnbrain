@@ -13,7 +13,7 @@ import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.filesystem.FilesystemService;
-import com.somedamnbrain.systems.universe.UniverseSystem;
+import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 
 @Singleton
 public class UniverseService {
@@ -45,7 +45,7 @@ public class UniverseService {
 		this.configured = true;
 		try {
 
-			this.universePreviousIteration = Universe.parseFrom(filesystem.readFile(UniverseSystem.UNIVERSE_FILE_PATH));
+			this.universePreviousIteration = Universe.parseFrom(filesystem.readFile(LocalUniverseSystem.UNIVERSE_FILE_PATH));
 			for (DiagnosticResult result : universePreviousIteration.getDiagnosticsList()) {
 				this.previousDiagnostics.put(result.getDiagnosticId(), result);
 			}
@@ -110,7 +110,7 @@ public class UniverseService {
 
 		// TODO report sustainability of universe
 
-		this.filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, finalizedUniverse.toByteArray());
+		this.filesystem.writeFile(LocalUniverseSystem.UNIVERSE_FILE_PATH, finalizedUniverse.toByteArray());
 		this.configured = false;
 	}
 

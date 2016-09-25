@@ -5,7 +5,7 @@ import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.filesystem.FilesystemService;
-import com.somedamnbrain.systems.universe.UniverseSystem;
+import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 
 public class MoveCorruptedFile implements CorrectiveAction {
 
@@ -24,8 +24,8 @@ public class MoveCorruptedFile implements CorrectiveAction {
 	@Override
 	public void attemptCorrection() throws UnexplainableException {
 		try {
-			filesystem.moveFile(UniverseSystem.UNIVERSE_FILE_PATH,
-					UniverseSystem.UNIVERSE_FILE_PATH + ".old." + System.currentTimeMillis());
+			filesystem.moveFile(LocalUniverseSystem.UNIVERSE_FILE_PATH,
+					LocalUniverseSystem.UNIVERSE_FILE_PATH + ".old." + System.currentTimeMillis());
 		} catch (NoResultException e) {
 			// If no universe file is present when this correction is called,
 			// something very wrong happened.

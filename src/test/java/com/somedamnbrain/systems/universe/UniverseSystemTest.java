@@ -37,7 +37,7 @@ public class UniverseSystemTest {
 		Injector injector = this.configureAndProvideInjector();
 
 		SystemDiagnosticService diagnosticService = injector.getInstance(SystemDiagnosticService.class);
-		UniverseSystem system = injector.getInstance(UniverseSystem.class);
+		LocalUniverseSystem system = injector.getInstance(LocalUniverseSystem.class);
 		UniverseService service = injector.getInstance(UniverseService.class);
 
 		diagnosticService.diagnosticFullSystem(system);
@@ -50,10 +50,10 @@ public class UniverseSystemTest {
 
 		FilesystemService filesystem = injector.getInstance(FilesystemService.class);
 		SystemDiagnosticService diagnosticService = injector.getInstance(SystemDiagnosticService.class);
-		UniverseSystem system = injector.getInstance(UniverseSystem.class);
+		LocalUniverseSystem system = injector.getInstance(LocalUniverseSystem.class);
 		UniverseService service = injector.getInstance(UniverseService.class);
 
-		filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, "some corrupted data".getBytes());
+		filesystem.writeFile(LocalUniverseSystem.UNIVERSE_FILE_PATH, "some corrupted data".getBytes());
 
 		diagnosticService.diagnosticFullSystem(system);
 		Assert.assertTrue(service.isConfigured());
@@ -65,14 +65,14 @@ public class UniverseSystemTest {
 
 		FilesystemService filesystem = injector.getInstance(FilesystemService.class);
 		SystemDiagnosticService diagnosticService = injector.getInstance(SystemDiagnosticService.class);
-		UniverseSystem system = injector.getInstance(UniverseSystem.class);
+		LocalUniverseSystem system = injector.getInstance(LocalUniverseSystem.class);
 		UniverseService service = injector.getInstance(UniverseService.class);
 
 		Universe.Builder universe = Universe.newBuilder();
 
 		universe.setName("NEWUNIVERSE");
 
-		filesystem.writeFile(UniverseSystem.UNIVERSE_FILE_PATH, universe.build().toByteArray());
+		filesystem.writeFile(LocalUniverseSystem.UNIVERSE_FILE_PATH, universe.build().toByteArray());
 
 		diagnosticService.diagnosticFullSystem(system);
 		Assert.assertTrue(service.isConfigured());

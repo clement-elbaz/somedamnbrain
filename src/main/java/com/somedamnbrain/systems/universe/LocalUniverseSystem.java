@@ -24,7 +24,7 @@ import com.somedamnbrain.systems.universe.diagnostics.ExistenceDiagnostic;
  *
  */
 @Singleton
-public class UniverseSystem implements SDBSystem {
+public class LocalUniverseSystem implements SDBSystem {
 	/** Path to the universe file. */
 	public static final String UNIVERSE_FILE_PATH = "~/.somedamnbrain-universe";
 
@@ -33,7 +33,7 @@ public class UniverseSystem implements SDBSystem {
 	private final UniverseService universeService;
 
 	@Inject
-	public UniverseSystem(final ExistenceDiagnostic existenceDiagnostic, final UniverseService universeService) {
+	public LocalUniverseSystem(final ExistenceDiagnostic existenceDiagnostic, final UniverseService universeService) {
 		this.existenceDiagnostic = existenceDiagnostic;
 		this.universeService = universeService;
 	}

@@ -8,16 +8,16 @@ import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
-import com.somedamnbrain.systems.universe.UniverseSystem;
+import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 
 public class MailSystem implements SDBSystem {
 
 	private final UniverseService universeService;
 
-	private final UniverseSystem universeSystem;
+	private final LocalUniverseSystem universeSystem;
 
 	@Inject
-	public MailSystem(final UniverseService universeService, final UniverseSystem universeSystem) {
+	public MailSystem(final UniverseService universeService, final LocalUniverseSystem universeSystem) {
 		this.universeService = universeService;
 		this.universeSystem = universeSystem;
 	}
