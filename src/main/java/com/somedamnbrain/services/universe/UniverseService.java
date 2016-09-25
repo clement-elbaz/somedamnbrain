@@ -45,23 +45,24 @@ public class UniverseService {
 		this.configured = true;
 		try {
 
-			this.universePreviousIteration = Universe.parseFrom(filesystem.readFile(LocalUniverseSystem.UNIVERSE_FILE_PATH));
-			for (DiagnosticResult result : universePreviousIteration.getDiagnosticsList()) {
+			this.universePreviousIteration = Universe
+					.parseFrom(filesystem.readFile(LocalUniverseSystem.UNIVERSE_FILE_PATH));
+			for (final DiagnosticResult result : universePreviousIteration.getDiagnosticsList()) {
 				this.previousDiagnostics.put(result.getDiagnosticId(), result);
 			}
-		} catch (InvalidProtocolBufferException e) {
+		} catch (final InvalidProtocolBufferException e) {
 			this.configured = false;
 			throw new UnexplainableException(e);
-		} catch (NoResultException e) {
+		} catch (final NoResultException e) {
 			this.configured = false;
 			throw new UnexplainableException(e);
-		} catch (UnexplainableException e) {
+		} catch (final UnexplainableException e) {
 			this.configured = false;
 			throw new UnexplainableException(e);
 		}
 	}
 
-	public void storeDiagnosticResult(Diagnostic diagnostic, DiagnosticResult result)
+	public void storeDiagnosticResult(final Diagnostic diagnostic, final DiagnosticResult result)
 			throws SystemNotAvailableException {
 		if (!this.configured) {
 			throw new SystemNotAvailableException();
@@ -76,12 +77,12 @@ public class UniverseService {
 		return this.universePreviousIteration.getPreviousExecutionNumber() + 1;
 	}
 
-	public int computeStability(Diagnostic diagnostic, String machineMessage) {
+	public int computeStability(final Diagnostic diagnostic, final String machineMessage) {
 		if (!this.configured) {
 			// If universe is not configured, then everything is new !
 			return 0;
 		} else {
-			DiagnosticResult previousResult = this.previousDiagnostics.get(diagnostic.getUniqueID());
+			final DiagnosticResult previousResult = this.previousDiagnostics.get(diagnostic.getUniqueID());
 			if (previousResult == null) {
 				return 0;
 			}
@@ -98,13 +99,13 @@ public class UniverseService {
 		if (!this.configured) {
 			throw new SystemNotAvailableException();
 		}
-		Universe.Builder modifiedUniverse = Universe.newBuilder();
+		final Universe.Builder modifiedUniverse = Universe.newBuilder();
 
 		modifiedUniverse.setName(universePreviousIteration.getName());
 		modifiedUniverse.addAllDiagnostics(this.currentDiagnostics.values());
 		modifiedUniverse.setPreviousExecutionNumber(universePreviousIteration.getPreviousExecutionNumber() + 1);
 
-		Universe finalizedUniverse = modifiedUniverse.build();
+		final Universe finalizedUniverse = modifiedUniverse.build();
 
 		// TODO report global stability and failed systems
 
@@ -116,6 +117,10 @@ public class UniverseService {
 
 	public boolean isConfigured() {
 		return configured;
+	}
+
+	public boolean diagnosticAlreadyRan(final Diagnostic diagnostic) {
+		return this.currentDiagnostics.containsKey(diagnostic.getUniqueID());
 	}
 
 }
