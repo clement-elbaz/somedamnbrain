@@ -1,12 +1,12 @@
 package com.somedamnbrain.services.alert;
 
-public class Alert {
+public class OldAlert {
 
 	private final String subject;
 
 	private final String content;
 
-	public Alert(final String subject, final String content) {
+	public OldAlert(final String subject, final String content) {
 		this.subject = subject;
 		this.content = content;
 

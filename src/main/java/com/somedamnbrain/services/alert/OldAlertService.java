@@ -8,7 +8,7 @@ import com.somedamnbrain.diagnostic.EnumDiagnosticAttempt;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.systems.SDBSystem;
 
-public class AlertService {
+public class OldAlertService {
 
 	/**
 	 * Alert the human minion about a diagnostic.
@@ -66,7 +66,7 @@ public class AlertService {
 
 		content.append("No correction is available for this problem. I can't do it on my own !");
 
-		this.alert(new Alert(subject, content.toString()));
+		this.alert(new OldAlert(subject, content.toString()));
 
 	}
 
@@ -91,7 +91,7 @@ public class AlertService {
 		content.append(
 				"I did not attempt any correction because another part of the system is in an unrecoverable failure.");
 
-		this.alert(new Alert(subject, content.toString()));
+		this.alert(new OldAlert(subject, content.toString()));
 
 	}
 
@@ -116,7 +116,7 @@ public class AlertService {
 
 		content.append("No more correction will be attempted. I can't do it on my own !");
 
-		this.alert(new Alert(subject, content.toString()));
+		this.alert(new OldAlert(subject, content.toString()));
 
 	}
 
@@ -141,7 +141,7 @@ public class AlertService {
 
 		content.append("A correction WILL be attempted. I'll let you know about the result.");
 
-		this.alert(new Alert(subject, content.toString()));
+		this.alert(new OldAlert(subject, content.toString()));
 
 	}
 
@@ -160,11 +160,11 @@ public class AlertService {
 		content.append(System.lineSeparator());
 		content.append(diagnosticResult.getHumanMessage());
 
-		this.alert(new Alert(subject, content.toString()));
+		this.alert(new OldAlert(subject, content.toString()));
 
 	}
 
-	private void alert(Alert alert) {
+	private void alert(OldAlert alert) {
 		System.out.println("ALERT - " + alert.getSubject());
 		System.out.println(alert.getContent());
 
@@ -188,14 +188,14 @@ public class AlertService {
 
 			content.append("I can't get the system back up on my own !");
 
-			this.alert(new Alert(subject, content.toString()));
+			this.alert(new OldAlert(subject, content.toString()));
 		} else {
 			String subject = system.getUniqueID() + " is UP";
 			StringBuilder content = new StringBuilder();
 
 			content.append("The system " + system.getUniqueID() + " is up with no unrecoverable failures.");
 
-			this.alert(new Alert(subject, content.toString()));
+			this.alert(new OldAlert(subject, content.toString()));
 		}
 
 	}

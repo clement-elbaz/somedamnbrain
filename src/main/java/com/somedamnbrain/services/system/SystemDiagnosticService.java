@@ -15,18 +15,18 @@ import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.ExplainableException;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.alert.AlertService;
+import com.somedamnbrain.services.alert.OldAlertService;
 import com.somedamnbrain.systems.SDBSystem;
 
 public class SystemDiagnosticService {
 
 	private final static int MAX_NUMBER_ATTEMPT = 50;
 
-	private final AlertService alertService;
+	private final OldAlertService alertService;
 	private final SystemSelectorService selectorService;
 
 	@Inject
-	public SystemDiagnosticService(final AlertService alertService, final SystemSelectorService selectorService) {
+	public SystemDiagnosticService(final OldAlertService alertService, final SystemSelectorService selectorService) {
 		this.alertService = alertService;
 		this.selectorService = selectorService;
 	}
