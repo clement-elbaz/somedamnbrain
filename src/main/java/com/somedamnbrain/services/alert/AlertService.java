@@ -18,7 +18,6 @@ public class AlertService {
 		System.out.println(report.getContent());
 		System.out.println(StringUtils.EMPTY);
 		System.out.println(StringUtils.EMPTY);
-		System.out.println("=======================================");
 
 	}
 

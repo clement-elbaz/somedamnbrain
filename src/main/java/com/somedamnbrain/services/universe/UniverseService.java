@@ -1,6 +1,8 @@
 package com.somedamnbrain.services.universe;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
@@ -8,11 +10,13 @@ import com.google.inject.Singleton;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
+import com.somedamnbrain.entities.Entities.SystemState;
 import com.somedamnbrain.entities.Entities.Universe;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.filesystem.FilesystemService;
+import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 
 @Singleton
@@ -27,11 +31,14 @@ public class UniverseService {
 
 	private final Map<String, DiagnosticResult> currentDiagnostics;
 
+	private final Map<String, SystemState> currentSystemStates;
+
 	@Inject
 	public UniverseService(final FilesystemService filesystem) {
 		this.filesystem = filesystem;
 		this.previousDiagnostics = new HashMap<String, DiagnosticResult>();
 		this.currentDiagnostics = new HashMap<String, DiagnosticResult>();
+		this.currentSystemStates = new HashMap<String, SystemState>();
 	}
 
 	/**
@@ -64,9 +71,6 @@ public class UniverseService {
 
 	public void storeDiagnosticResult(final Diagnostic diagnostic, final DiagnosticResult result)
 			throws SystemNotAvailableException {
-		if (!this.configured) {
-			throw new SystemNotAvailableException();
-		}
 		this.currentDiagnostics.put(diagnostic.getUniqueID(), result);
 	}
 
@@ -121,6 +125,91 @@ public class UniverseService {
 
 	public boolean diagnosticAlreadyRan(final Diagnostic diagnostic) {
 		return this.currentDiagnostics.containsKey(diagnostic.getUniqueID());
+	}
+
+	public SystemState computeAndStoreSystemState(final SDBSystem system) {
+		final SystemState.Builder state = SystemState.newBuilder();
+
+		state.setUniqueId(system.getUniqueID());
+		state.setStability(this.computeSystemStability(system));
+
+		final boolean allDependenciesUp = this.allSystemsAvailable(system.getDependencies());
+		final boolean allDiagnosticsOk = this.allDiagnosticsOk(system.getDiagnostics());
+
+		final boolean systemUp = allDependenciesUp && allDiagnosticsOk;
+		state.setUp(systemUp);
+
+		final SystemState finalizedState = state.build();
+		this.currentSystemStates.put(finalizedState.getUniqueId(), finalizedState);
+		return finalizedState;
+
+	}
+
+	private int computeSystemStability(final SDBSystem system) {
+		if (!this.configured) {
+			return 0;
+		}
+		int minimumStability = Integer.MAX_VALUE;
+
+		for (final Diagnostic diagnostic : system.getDiagnostics()) {
+			final DiagnosticResult result = this.currentDiagnostics.get(diagnostic.getUniqueID());
+			minimumStability = Math.min(minimumStability, result.getStability());
+		}
+
+		for (final SDBSystem dependency : system.getDependencies()) {
+			final SystemState dependencyState = this.currentSystemStates.get(dependency.getUniqueID());
+			minimumStability = Math.min(minimumStability, dependencyState.getStability());
+		}
+
+		return minimumStability;
+	}
+
+	private boolean allDiagnosticsOk(final List<Diagnostic> diagnostics) {
+		for (final Diagnostic diagnostic : diagnostics) {
+			final DiagnosticResult result = this.currentDiagnostics.get(diagnostic.getUniqueID());
+			if (!result.getSuccess()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean allSystemsAvailable(final List<SDBSystem> systems) {
+		for (final SDBSystem system : systems) {
+			final SystemState state = this.currentSystemStates.get(system.getUniqueID());
+			if (!state.getUp()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public List<Diagnostic> getFailedDiagnostics(final SDBSystem currentSystem) {
+		final List<Diagnostic> result = new ArrayList<Diagnostic>();
+
+		for (final Diagnostic diagnostic : currentSystem.getDiagnostics()) {
+			final DiagnosticResult diagnosticResult = this.currentDiagnostics.get(diagnostic.getUniqueID());
+			if (!diagnosticResult.getSuccess()) {
+				result.add(diagnostic);
+			}
+		}
+
+		return result;
+	}
+
+	public List<SDBSystem> getFailedDependencies(final SDBSystem currentSystem) {
+		final List<SDBSystem> result = new ArrayList<SDBSystem>();
+
+		for (final SDBSystem dependency : currentSystem.getDependencies()) {
+			final SystemState state = this.currentSystemStates.get(dependency.getUniqueID());
+			if (!state.getUp()) {
+				result.add(dependency);
+			}
+		}
+
+		return result;
 	}
 
 }

@@ -1,11 +1,14 @@
 package com.somedamnbrain.services.report;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
+import com.somedamnbrain.entities.Entities.SystemState;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.services.alert.AlertService;
 import com.somedamnbrain.services.universe.UniverseService;
@@ -65,7 +68,6 @@ public class ReportService {
 		System.out.println(report.getContent());
 		System.out.println(StringUtils.EMPTY);
 		System.out.println(StringUtils.EMPTY);
-		System.out.println("=======================================");
 
 	}
 
@@ -105,7 +107,6 @@ public class ReportService {
 	private StringBuilder initiateSubject(final SDBSystem rootSystem, final SDBSystem currentSystem) {
 		final StringBuilder subject = new StringBuilder();
 
-		subject.append("Somedamnbrain - ");
 		subject.append(rootSystem.getUniqueID());
 		subject.append(" - ");
 		subject.append(currentSystem.getUniqueID());
@@ -186,6 +187,67 @@ public class ReportService {
 		final Report report = new Report("Somedamnbrain - A crash occured !", content.toString());
 
 		this.alertService.promoteReportToAlert(report);
+	}
+
+	public SystemState reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem) {
+		final SystemState state = this.universeService.computeAndStoreSystemState(currentSystem);
+
+		final StringBuilder subject = this.initiateSubject(rootSystem, currentSystem);
+		subject.append(currentSystem.getUniqueID() + " is ");
+		if (state.getUp()) {
+			subject.append("UP");
+		} else {
+			subject.append("DOWN");
+		}
+
+		final StringBuilder content = this.initiateContent(rootSystem, currentSystem);
+
+		if (state.getUp()) {
+			content.append(currentSystem.getUniqueID() + " is fully up and running since " + state.getStability()
+					+ " executions.");
+		} else {
+			content.append(currentSystem.getUniqueID() + " is down since " + state.getStability() + " executions.");
+
+			content.append("\r\n");
+			content.append("\r\n");
+
+			final List<Diagnostic> failedDiagnostics = this.universeService.getFailedDiagnostics(currentSystem);
+			if (failedDiagnostics.isEmpty()) {
+				content.append("No failed diagnostics");
+			} else {
+				content.append("The following diagnostics are in failure : ");
+				for (final Diagnostic failedDiagnostic : failedDiagnostics) {
+					content.append(failedDiagnostic.getUniqueID());
+					content.append("\r\n");
+				}
+			}
+
+			content.append("\r\n");
+			content.append("\r\n");
+
+			final List<SDBSystem> failedDependencies = this.universeService.getFailedDependencies(currentSystem);
+			if (failedDependencies.isEmpty()) {
+				content.append("No failed dependencies");
+			} else {
+				content.append("The following dependencies are in failure : ");
+				for (final SDBSystem dependency : failedDependencies) {
+					content.append("\r\n");
+					content.append(dependency.getUniqueID());
+				}
+			}
+
+		}
+
+		final Report report = new Report(subject.toString(), content.toString());
+
+		if (state.getStability() == 0) {
+			this.alertService.promoteReportToAlert(report);
+		} else {
+			this.displayReportOnConsole(report);
+		}
+
+		return state;
+
 	}
 
 }

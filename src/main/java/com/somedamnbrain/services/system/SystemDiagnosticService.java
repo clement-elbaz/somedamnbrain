@@ -11,6 +11,7 @@ import com.somedamnbrain.diagnostic.CorrectiveAction;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.diagnostic.DiagnosticRun;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
+import com.somedamnbrain.entities.Entities.SystemState;
 import com.somedamnbrain.exceptions.ExplainableException;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
@@ -54,8 +55,6 @@ public class SystemDiagnosticService {
 			}
 			selectorService.markSystemAsDiagnosticated(currentSystem);
 		}
-
-		// TODO report full system
 	}
 
 	/**
@@ -86,11 +85,11 @@ public class SystemDiagnosticService {
 			}
 		}
 
-		// TODO report single system
+		final SystemState state = reportService.reportSystem(rootSystem, system);
 
 		if (!unrecoverableFailures.isEmpty()) {
 			throw new UnrecoverableDiagnosticFailureException();
-		} else {
+		} else if (state.getUp()) {
 			system.executeIfOperational();
 		}
 	}
@@ -126,6 +125,7 @@ public class SystemDiagnosticService {
 				this.reportService.reportCorrectionAttempt(rootSystem, system, diagnostic, correction);
 				correction.attemptCorrection();
 				final DiagnosticResult resultAfterCorrection = diagnostic.attemptDiagnostic();
+				this.reportService.reportDiagnosticResult(rootSystem, system, diagnostic, resultAfterCorrection);
 				if (!resultAfterCorrection.getSuccess()) {
 					if (this.isUnrecoverableFailure(result, resultAfterCorrection, nbAttempt)) {
 						unrecoverableFailures.add(new DiagnosticRun(diagnostic, resultAfterCorrection));
