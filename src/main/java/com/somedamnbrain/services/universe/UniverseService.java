@@ -69,8 +69,7 @@ public class UniverseService {
 		}
 	}
 
-	public void storeDiagnosticResult(final Diagnostic diagnostic, final DiagnosticResult result)
-			throws SystemNotAvailableException {
+	public void storeDiagnosticResult(final Diagnostic diagnostic, final DiagnosticResult result) {
 		this.currentDiagnostics.put(diagnostic.getUniqueID(), result);
 	}
 
@@ -210,6 +209,32 @@ public class UniverseService {
 		}
 
 		return result;
+	}
+
+	public SystemState recomputeCompleteSystemStability(final SDBSystem currentSystem) {
+		for (final Diagnostic diagnostic : currentSystem.getDiagnostics()) {
+			final DiagnosticResult resultWithWrongStability = this.currentDiagnostics.get(diagnostic.getUniqueID());
+			final DiagnosticResult resultWithCorrectStability = diagnostic.newResult(
+					resultWithWrongStability.getSuccess(), resultWithWrongStability.getMachineMessage(),
+					resultWithWrongStability.getHumanMessage(), this);
+
+			this.storeDiagnosticResult(diagnostic, resultWithCorrectStability);
+
+		}
+
+		final int correctSystemStability = this.computeSystemStability(currentSystem);
+
+		final SystemState.Builder correctedSystemState = this.currentSystemStates.get(currentSystem.getUniqueID())
+				.toBuilder();
+
+		correctedSystemState.setStability(correctSystemStability);
+
+		final SystemState finalState = correctedSystemState.build();
+
+		this.currentSystemStates.put(correctedSystemState.getUniqueId(), finalState);
+
+		return finalState;
+
 	}
 
 }

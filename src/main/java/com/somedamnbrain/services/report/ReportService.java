@@ -13,6 +13,7 @@ import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.services.alert.AlertService;
 import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
+import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 
 public class ReportService {
 
@@ -44,12 +45,7 @@ public class ReportService {
 			previousCorrectionAttempt = true;
 		}
 
-		try {
-			this.universeService.storeDiagnosticResult(diagnostic, result);
-		} catch (final SystemNotAvailableException e) {
-			// We do not store diagnostic result if universe system is not
-			// available
-		}
+		this.universeService.storeDiagnosticResult(diagnostic, result);
 
 		final Report report = this.computeReport(rootSystem, currentSystem, diagnostic, result, unstable,
 				previousCorrectionAttempt);
@@ -119,8 +115,7 @@ public class ReportService {
 		boolean shouldAlert = false;
 
 		// launch an alert if stability is 0 <-- the system just changed state !
-		final int diagnosticStability = universeService.computeStability(diagnostic, result.getMachineMessage());
-		if (diagnosticStability == 0) {
+		if (result.getStability() == 0) {
 			// => With one exception, if this is the first execution of the
 			// universe, we only alert for failed diagnostic
 			if (!result.getSuccess()) {
@@ -189,7 +184,18 @@ public class ReportService {
 		this.alertService.promoteReportToAlert(report);
 	}
 
-	public void reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem, final SystemState state) {
+	public void reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem, final SystemState givenState) {
+		// Special case when current system is LocalUniverseSystem :
+		// because its diagnostics are executed before UniverseService is
+		// available, all the stabilities are wrong. In that case we recompute
+		// all stabilities for the diagnostics now, as the UniverseService is
+		// now available.
+		final SystemState state;
+		if (currentSystem instanceof LocalUniverseSystem) {
+			state = this.universeService.recomputeCompleteSystemStability(currentSystem);
+		} else {
+			state = givenState;
+		}
 
 		final StringBuilder subject = this.initiateSubject(rootSystem, currentSystem);
 		subject.append(currentSystem.getUniqueID() + " is ");
