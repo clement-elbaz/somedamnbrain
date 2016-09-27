@@ -16,6 +16,7 @@ import com.somedamnbrain.exceptions.ExplainableException;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.report.ReportService;
+import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
 
 public class SystemDiagnosticService {
@@ -24,11 +25,14 @@ public class SystemDiagnosticService {
 
 	private final ReportService reportService;
 	private final SystemSelectorService selectorService;
+	private final UniverseService universeService;
 
 	@Inject
-	public SystemDiagnosticService(final ReportService reportService, final SystemSelectorService selectorService) {
+	public SystemDiagnosticService(final ReportService reportService, final SystemSelectorService selectorService,
+			final UniverseService universeService) {
 		this.reportService = reportService;
 		this.selectorService = selectorService;
+		this.universeService = universeService;
 	}
 
 	/**
@@ -85,12 +89,16 @@ public class SystemDiagnosticService {
 			}
 		}
 
-		final SystemState state = reportService.reportSystem(rootSystem, system);
+		final SystemState state = this.universeService.computeAndStoreSystemState(system);
+
+		if (state.getUp()) {
+			system.executeIfOperational();
+		}
+
+		reportService.reportSystem(rootSystem, system, state);
 
 		if (!unrecoverableFailures.isEmpty()) {
 			throw new UnrecoverableDiagnosticFailureException();
-		} else if (state.getUp()) {
-			system.executeIfOperational();
 		}
 	}
 

@@ -189,8 +189,7 @@ public class ReportService {
 		this.alertService.promoteReportToAlert(report);
 	}
 
-	public SystemState reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem) {
-		final SystemState state = this.universeService.computeAndStoreSystemState(currentSystem);
+	public void reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem, final SystemState state) {
 
 		final StringBuilder subject = this.initiateSubject(rootSystem, currentSystem);
 		subject.append(currentSystem.getUniqueID() + " is ");
@@ -245,8 +244,6 @@ public class ReportService {
 		} else {
 			this.displayReportOnConsole(report);
 		}
-
-		return state;
 
 	}
 
