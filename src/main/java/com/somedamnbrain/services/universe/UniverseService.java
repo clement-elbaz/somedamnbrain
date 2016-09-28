@@ -110,10 +110,6 @@ public class UniverseService {
 
 		final Universe finalizedUniverse = modifiedUniverse.build();
 
-		// TODO report global stability and failed systems
-
-		// TODO report sustainability of universe
-
 		this.filesystem.writeFile(LocalUniverseSystem.UNIVERSE_FILE_PATH, finalizedUniverse.toByteArray());
 		this.configured = false;
 	}
@@ -235,6 +231,46 @@ public class UniverseService {
 
 		return finalState;
 
+	}
+
+	public int computeGlobalStability() {
+		int result = Integer.MAX_VALUE;
+		for (final DiagnosticResult diagnosticResult : this.currentDiagnostics.values()) {
+			result = Math.min(result, diagnosticResult.getStability());
+		}
+
+		return result;
+	}
+
+	public String getUniverseName() throws SystemNotAvailableException {
+		if (!this.configured) {
+			throw new SystemNotAvailableException();
+		}
+		return this.universePreviousIteration.getName();
+	}
+
+	public List<DiagnosticResult> getFailedDiagnostics() {
+		final List<DiagnosticResult> result = new ArrayList<DiagnosticResult>();
+
+		for (final DiagnosticResult diagnosticResult : this.currentDiagnostics.values()) {
+			if (!diagnosticResult.getSuccess()) {
+				result.add(diagnosticResult);
+			}
+		}
+
+		return result;
+	}
+
+	public List<SystemState> getFailedSystems() {
+		final List<SystemState> result = new ArrayList<SystemState>();
+
+		for (final SystemState state : this.currentSystemStates.values()) {
+			if (!state.getUp()) {
+				result.add(state);
+			}
+		}
+
+		return result;
 	}
 
 }

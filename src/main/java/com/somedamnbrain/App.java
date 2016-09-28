@@ -10,6 +10,7 @@ import com.somedamnbrain.services.ask.AskServiceImpl;
 import com.somedamnbrain.services.filesystem.FilesystemService;
 import com.somedamnbrain.services.filesystem.LocalFileSystemImpl;
 import com.somedamnbrain.services.system.SystemDiagnosticService;
+import com.somedamnbrain.services.universe.SelfService;
 import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.self.SelfSystem;
 
@@ -25,11 +26,14 @@ public class App {
 		final SystemDiagnosticService diagnosticService = injector.getInstance(SystemDiagnosticService.class);
 		final UniverseService universeService = injector.getInstance(UniverseService.class);
 
-		final SelfSystem self = injector.getInstance(SelfSystem.class);
+		final SelfSystem selfSystem = injector.getInstance(SelfSystem.class);
+		final SelfService selfService = injector.getInstance(SelfService.class);
 
 		askService.initialize();
 
-		diagnosticService.diagnosticFullSystem(self);
+		diagnosticService.diagnosticFullSystem(selfSystem);
+
+		selfService.reportSelf();
 
 		try {
 			universeService.closeAndSaveUniverse();

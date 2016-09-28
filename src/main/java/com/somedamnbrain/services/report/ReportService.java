@@ -253,4 +253,80 @@ public class ReportService {
 
 	}
 
+	public void reportUnsustainability() {
+		alertService.promoteReportToAlert(new Report("Somedamnbrain is not sustainable !",
+				"Somedamnbrain is not sustainable and will not be able to self-execute after this execution !"));
+
+	}
+
+	public void reportStability() throws SystemNotAvailableException {
+		final int globalStability = this.universeService.computeGlobalStability();
+		final boolean stable = globalStability != 0;
+
+		final StringBuilder subject = new StringBuilder();
+		subject.append("Universe " + this.universeService.getUniverseName() + " is ");
+		if (stable) {
+			subject.append("stable");
+		} else {
+			subject.append("unstable");
+		}
+
+		final StringBuilder content = new StringBuilder();
+		content.append("Universe " + this.universeService.getUniverseName() + " is stable since " + globalStability
+				+ " executions");
+		content.append("\r\n");
+		content.append("\r\n");
+
+		final List<DiagnosticResult> failedDiagnostics = this.universeService.getFailedDiagnostics();
+
+		if (failedDiagnostics.isEmpty()) {
+			content.append("No diagnostics failing.");
+		} else {
+			content.append("The following diagnostics are in failure : ");
+			content.append("\r\n");
+			for (final DiagnosticResult failedDiagnostic : failedDiagnostics) {
+				content.append("\r\n");
+				content.append(failedDiagnostic.getDiagnosticId());
+			}
+		}
+
+		content.append("\r\n");
+		content.append("\r\n");
+
+		final List<SystemState> failedSystems = this.universeService.getFailedSystems();
+		if (failedSystems.isEmpty()) {
+			content.append("No systems failing.");
+		} else {
+			content.append("The following systems are in failure : ");
+			content.append("\r\n");
+			for (final SystemState failedSystem : failedSystems) {
+				content.append("\r\n");
+				content.append(failedSystem.getUniqueId());
+			}
+		}
+
+		// We want to alert a human about stability at every power of two in
+		// order to
+		// decrease human notification when situation is stable.
+		// @see stackoverflow.com/a/19383296 If this one actually works this is
+		// f**king brillant
+		final boolean shouldAlert = globalStability == 0 || (globalStability & (globalStability - 1)) == 0;
+
+		if (shouldAlert) {
+			content.append("\r\n");
+			content.append("\r\n");
+			content.append("I will notify you again in " + globalStability + " executions, approximately "
+					+ globalStability * 5 + " minutes");
+		}
+
+		final Report report = new Report(subject.toString(), content.toString());
+
+		if (shouldAlert) {
+			this.alertService.promoteReportToAlert(report);
+		} else {
+			this.displayReportOnConsole(report);
+		}
+
+	}
+
 }
