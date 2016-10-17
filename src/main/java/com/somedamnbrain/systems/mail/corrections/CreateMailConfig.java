@@ -43,7 +43,7 @@ public class CreateMailConfig implements CorrectiveAction {
 			this.askConfig(newConfig, "from", "What is the from address ?");
 			this.askConfig(newConfig, "ssl", "Should I use SSL to connect to the SMTP host (true/false) ?");
 
-			this.askConfig(newConfig, "minion.address", "What is YOUR email address, human minion ?");
+			this.askConfig(newConfig, "admin.address", "What is YOUR email address, human minion ?");
 
 			final Configuration finalizedConfig = newConfig.build();
 
@@ -69,6 +69,8 @@ public class CreateMailConfig implements CorrectiveAction {
 		configItem.setKey(key);
 
 		configItem.setValue(askService.askHumanMinion(humanQuestion));
+
+		newConfig.addConfigItems(configItem.build());
 	}
 
 }
