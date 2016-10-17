@@ -24,12 +24,11 @@ public class MailConfigPresent implements Diagnostic {
 
 	@Override
 	public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
-		final boolean configPresent = this.universeService.getConfig("mail") != null;
-
-		if (configPresent) {
+		try {
+			this.universeService.getConfig("mail");
 			return this.newResult(true, "mail-config-OK", "Mail config is present", universeService);
-		} else {
-			return this.newResult(true, "mail-config-mising", "Mail config is missing", universeService);
+		} catch (final NoResultException e) {
+			return this.newResult(false, "mail-config-missing", "Mail config is missing", universeService);
 		}
 
 	}

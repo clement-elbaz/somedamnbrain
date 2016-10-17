@@ -34,12 +34,15 @@ public class UniverseService {
 
 	private final Map<String, SystemState> currentSystemStates;
 
+	private final Map<String, Configuration> currentConfigs;
+
 	@Inject
 	public UniverseService(final FilesystemService filesystem) {
 		this.filesystem = filesystem;
 		this.previousDiagnostics = new HashMap<String, DiagnosticResult>();
 		this.currentDiagnostics = new HashMap<String, DiagnosticResult>();
 		this.currentSystemStates = new HashMap<String, SystemState>();
+		this.currentConfigs = new HashMap<String, Configuration>();
 	}
 
 	/**
@@ -274,8 +277,12 @@ public class UniverseService {
 		return result;
 	}
 
-	public Configuration getConfig(final String configName) {
-		throw new RuntimeException("not implemented !");
+	public Configuration getConfig(final String configName) throws NoResultException {
+		if (!this.currentConfigs.containsKey(configName)) {
+			throw new NoResultException();
+		}
+
+		return this.currentConfigs.get(configName);
 	}
 
 }
