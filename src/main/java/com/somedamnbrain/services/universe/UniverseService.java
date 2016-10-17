@@ -9,6 +9,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.somedamnbrain.diagnostic.Diagnostic;
+import com.somedamnbrain.entities.Entities.Configuration;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.entities.Entities.SystemState;
 import com.somedamnbrain.entities.Entities.Universe;
@@ -271,6 +272,10 @@ public class UniverseService {
 		}
 
 		return result;
+	}
+
+	public Configuration getConfig(final String configName) {
+		throw new RuntimeException("not implemented !");
 	}
 
 }

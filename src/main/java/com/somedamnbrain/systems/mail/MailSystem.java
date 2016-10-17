@@ -6,21 +6,20 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
+import com.somedamnbrain.systems.mail.diagnostics.MailConfigPresent;
 import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 
 public class MailSystem extends AbstractSystem {
-
-	private final UniverseService universeService;
-
 	private final LocalUniverseSystem universeSystem;
 
+	private final MailConfigPresent mailConfigPresentDiagnostic;
+
 	@Inject
-	public MailSystem(final UniverseService universeService, final LocalUniverseSystem universeSystem) {
-		this.universeService = universeService;
+	public MailSystem(final LocalUniverseSystem universeSystem, final MailConfigPresent mailConfigPresentDiagnostic) {
 		this.universeSystem = universeSystem;
+		this.mailConfigPresentDiagnostic = mailConfigPresentDiagnostic;
 	}
 
 	@Override
@@ -35,7 +34,7 @@ public class MailSystem extends AbstractSystem {
 
 	@Override
 	public List<Diagnostic> getDiagnostics() {
-		return Diagnostic.notImplemented(this, universeService);
+		return Arrays.asList(mailConfigPresentDiagnostic);
 	}
 
 	@Override
