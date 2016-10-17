@@ -7,14 +7,17 @@ import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.systems.mail.corrections.CreateMailConfig;
 
 public class MailConfigPresent implements Diagnostic {
 
 	private final UniverseService universeService;
+	private final CreateMailConfig createMailConfig;
 
 	@Inject
-	public MailConfigPresent(final UniverseService universeService) {
+	public MailConfigPresent(final UniverseService universeService, final CreateMailConfig createMailConfig) {
 		this.universeService = universeService;
+		this.createMailConfig = createMailConfig;
 	}
 
 	@Override
@@ -35,7 +38,7 @@ public class MailConfigPresent implements Diagnostic {
 
 	@Override
 	public CorrectiveAction getCorrection(final DiagnosticResult diagnosticResult) throws NoResultException {
-		throw new NoResultException();
+		return this.createMailConfig;
 	}
 
 }

@@ -285,4 +285,10 @@ public class UniverseService {
 		return this.currentConfigs.get(configName);
 	}
 
+	public void publishConfiguration(final Configuration config) {
+		this.currentConfigs.remove(config.getConfigName());
+		this.currentConfigs.put(config.getConfigName(), config);
+
+	}
+
 }
