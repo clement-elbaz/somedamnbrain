@@ -58,9 +58,17 @@ public class UniverseService {
 
 			this.universePreviousIteration = Universe
 					.parseFrom(filesystem.readFile(LocalUniverseSystem.UNIVERSE_FILE_PATH));
+
+			// Load previous diagnostics
 			for (final DiagnosticResult result : universePreviousIteration.getDiagnosticsList()) {
 				this.previousDiagnostics.put(result.getDiagnosticId(), result);
 			}
+
+			// Load previous configurations into current configurations
+			for (final Configuration config : universePreviousIteration.getConfigurationsList()) {
+				this.publishConfiguration(config);
+			}
+
 		} catch (final InvalidProtocolBufferException e) {
 			this.configured = false;
 			throw new UnexplainableException(e);
@@ -110,6 +118,7 @@ public class UniverseService {
 
 		modifiedUniverse.setName(universePreviousIteration.getName());
 		modifiedUniverse.addAllDiagnostics(this.currentDiagnostics.values());
+		modifiedUniverse.addAllConfigurations(this.currentConfigs.values());
 		modifiedUniverse.setPreviousExecutionNumber(universePreviousIteration.getPreviousExecutionNumber() + 1);
 
 		final Universe finalizedUniverse = modifiedUniverse.build();
