@@ -39,8 +39,7 @@ public class MailSystem extends AbstractSystem {
 
 	@Override
 	public void executeIfOperational() throws UnexplainableException {
-		// TODO
-
+		// nothing to do
 	}
 
 }

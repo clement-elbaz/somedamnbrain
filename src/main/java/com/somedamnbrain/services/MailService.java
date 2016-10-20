@@ -6,20 +6,26 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.somedamnbrain.entities.Entities.ConfigItem;
 import com.somedamnbrain.entities.Entities.Configuration;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.ask.AskService;
+import com.somedamnbrain.services.universe.UniverseService;
 
+@Singleton
 public class MailService {
 
 	private final AskService askService;
 
+	private final UniverseService universeService;
+
 	@Inject
-	public MailService(final AskService askService) {
+	public MailService(final AskService askService, final UniverseService universeService) {
 		this.askService = askService;
+		this.universeService = universeService;
 	}
 
 	public boolean testConfig(final Configuration configuration)
@@ -38,6 +44,16 @@ public class MailService {
 		}
 
 		return secret.equals(askService.askHumanMinion("I just sent you a secret by email ! What is it ?"));
+	}
+
+	public void sendMail(final String subject, final String content)
+			throws SystemNotAvailableException, UnexplainableException {
+		try {
+			final Configuration mailConfiguration = this.universeService.getConfig("mail");
+			this.sendMail(mailConfiguration, subject, content);
+		} catch (final NoResultException e) {
+			throw new SystemNotAvailableException(e);
+		}
 	}
 
 	private void sendMail(final Configuration config, final String subject, final String content)
@@ -72,5 +88,4 @@ public class MailService {
 		}
 		throw new NoResultException();
 	}
-
 }

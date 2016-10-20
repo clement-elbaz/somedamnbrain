@@ -10,6 +10,7 @@ import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.entities.Entities.SystemState;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
+import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.alert.AlertService;
 import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
@@ -28,7 +29,7 @@ public class ReportService {
 	}
 
 	public void reportDiagnosticResult(final SDBSystem rootSystem, final SDBSystem currentSystem,
-			final Diagnostic diagnostic, final DiagnosticResult result) {
+			final Diagnostic diagnostic, final DiagnosticResult result) throws UnexplainableException {
 
 		boolean shouldAlert = false;
 		boolean unstable = false;
@@ -138,7 +139,7 @@ public class ReportService {
 	}
 
 	public void reportCorrectionAttempt(final SDBSystem rootSystem, final SDBSystem currentSystem,
-			final Diagnostic diagnostic, final CorrectiveAction correctiveAction) {
+			final Diagnostic diagnostic, final CorrectiveAction correctiveAction) throws UnexplainableException {
 		// launch an alert for every correction attempt
 		final StringBuilder subject = this.initiateSubject(rootSystem, currentSystem);
 		subject.append("A correction will be attempted");
@@ -155,7 +156,8 @@ public class ReportService {
 
 	}
 
-	public void reportCrash(final SDBSystem rootSystem, final SDBSystem currentSystem, final Exception e) {
+	public void reportCrash(final SDBSystem rootSystem, final SDBSystem currentSystem, final Exception e)
+			throws UnexplainableException {
 		// launch an alert for every crash
 		final StringBuilder subject = this.initiateSubject(rootSystem, currentSystem);
 		subject.append("A crash occured !");
@@ -171,7 +173,7 @@ public class ReportService {
 		this.alertService.promoteReportToAlert(report);
 	}
 
-	public void reportCrash(final Exception e) {
+	public void reportCrash(final Exception e) throws UnexplainableException {
 		// launch an alert for every crash
 		final StringBuilder content = new StringBuilder();
 		content.append("A crash occured but I do not know when : ");
@@ -184,7 +186,8 @@ public class ReportService {
 		this.alertService.promoteReportToAlert(report);
 	}
 
-	public void reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem, final SystemState givenState) {
+	public void reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem, final SystemState givenState)
+			throws UnexplainableException {
 		// Special case when current system is LocalUniverseSystem :
 		// because its diagnostics are executed before UniverseService is
 		// available, all the stabilities are wrong. In that case we recompute
@@ -253,13 +256,13 @@ public class ReportService {
 
 	}
 
-	public void reportUnsustainability() {
+	public void reportUnsustainability() throws UnexplainableException {
 		alertService.promoteReportToAlert(new Report("Somedamnbrain is not sustainable !",
 				"Somedamnbrain is not sustainable and will not be able to self-execute after this execution !"));
 
 	}
 
-	public void reportStability() throws SystemNotAvailableException {
+	public void reportStability() throws SystemNotAvailableException, UnexplainableException {
 		final int globalStability = this.universeService.computeGlobalStability();
 		final boolean stable = globalStability != 0;
 

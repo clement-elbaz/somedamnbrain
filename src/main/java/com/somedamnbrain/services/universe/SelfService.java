@@ -3,6 +3,7 @@ package com.somedamnbrain.services.universe;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
+import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.report.ReportService;
 
 @Singleton
@@ -21,7 +22,7 @@ public class SelfService {
 		this.sustainable = true;
 	}
 
-	public void reportSelf() {
+	public void reportSelf() throws UnexplainableException {
 		try {
 			reportService.reportStability();
 		} catch (final SystemNotAvailableException e) {
