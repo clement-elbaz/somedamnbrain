@@ -6,15 +6,18 @@ import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
+import com.somedamnbrain.services.universe.ConfigService;
 import com.somedamnbrain.services.universe.UniverseService;
 
 public class SSHConfigPresent implements Diagnostic {
 
 	private final UniverseService universeService;
+	private final ConfigService configService;
 
 	@Inject
-	public SSHConfigPresent(final UniverseService universeService) {
+	public SSHConfigPresent(final UniverseService universeService, final ConfigService configService) {
 		this.universeService = universeService;
+		this.configService = configService;
 	}
 
 	@Override
@@ -25,7 +28,7 @@ public class SSHConfigPresent implements Diagnostic {
 	@Override
 	public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
 		try {
-			this.universeService.getConfig("ssh");
+			this.configService.getConfig("ssh");
 			return this.newResult(true, "ssh-config-OK", "SSH config is present", universeService);
 		} catch (final NoResultException e) {
 			return this.newResult(false, "ssh-config-missing", "SSH config is missing", universeService);

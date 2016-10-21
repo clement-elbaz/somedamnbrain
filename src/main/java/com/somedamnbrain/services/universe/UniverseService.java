@@ -24,6 +24,7 @@ import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 public class UniverseService {
 
 	private final FilesystemService filesystem;
+	private final ConfigService configService;
 
 	private boolean configured;
 	private Universe universePreviousIteration;
@@ -34,15 +35,13 @@ public class UniverseService {
 
 	private final Map<String, SystemState> currentSystemStates;
 
-	private final Map<String, Configuration> currentConfigs;
-
 	@Inject
-	public UniverseService(final FilesystemService filesystem) {
+	public UniverseService(final FilesystemService filesystem, final ConfigService configService) {
 		this.filesystem = filesystem;
+		this.configService = configService;
 		this.previousDiagnostics = new HashMap<String, DiagnosticResult>();
 		this.currentDiagnostics = new HashMap<String, DiagnosticResult>();
 		this.currentSystemStates = new HashMap<String, SystemState>();
-		this.currentConfigs = new HashMap<String, Configuration>();
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class UniverseService {
 
 			// Load previous configurations into current configurations
 			for (final Configuration config : universePreviousIteration.getConfigurationsList()) {
-				this.publishConfiguration(config);
+				this.configService.publishConfiguration(config);
 			}
 
 		} catch (final InvalidProtocolBufferException e) {
@@ -118,7 +117,7 @@ public class UniverseService {
 
 		modifiedUniverse.setName(universePreviousIteration.getName());
 		modifiedUniverse.addAllDiagnostics(this.currentDiagnostics.values());
-		modifiedUniverse.addAllConfigurations(this.currentConfigs.values());
+		modifiedUniverse.addAllConfigurations(this.configService.getAllConfigurations());
 		modifiedUniverse.setPreviousExecutionNumber(universePreviousIteration.getPreviousExecutionNumber() + 1);
 
 		final Universe finalizedUniverse = modifiedUniverse.build();
@@ -284,20 +283,6 @@ public class UniverseService {
 		}
 
 		return result;
-	}
-
-	public Configuration getConfig(final String configName) throws NoResultException {
-		if (!this.currentConfigs.containsKey(configName)) {
-			throw new NoResultException();
-		}
-
-		return this.currentConfigs.get(configName);
-	}
-
-	public void publishConfiguration(final Configuration config) {
-		this.currentConfigs.remove(config.getConfigName());
-		this.currentConfigs.put(config.getConfigName(), config);
-
 	}
 
 }

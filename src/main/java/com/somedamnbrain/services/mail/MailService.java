@@ -13,19 +13,19 @@ import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.ask.AskService;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.ConfigService;
 
 @Singleton
 public class MailService {
 
 	private final AskService askService;
 
-	private final UniverseService universeService;
+	private final ConfigService configService;
 
 	@Inject
-	public MailService(final AskService askService, final UniverseService universeService) {
+	public MailService(final AskService askService, final ConfigService configService) {
 		this.askService = askService;
-		this.universeService = universeService;
+		this.configService = configService;
 	}
 
 	public boolean testConfig(final Configuration configuration)
@@ -49,7 +49,7 @@ public class MailService {
 	public void sendMail(final String subject, final String content)
 			throws SystemNotAvailableException, UnexplainableException {
 		try {
-			final Configuration mailConfiguration = this.universeService.getConfig("mail");
+			final Configuration mailConfiguration = this.configService.getConfig("mail");
 			this.sendMail(mailConfiguration, subject, content);
 		} catch (final NoResultException e) {
 			throw new SystemNotAvailableException(e);

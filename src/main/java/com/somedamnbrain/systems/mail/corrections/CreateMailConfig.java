@@ -9,20 +9,20 @@ import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.ask.AskService;
 import com.somedamnbrain.services.mail.MailService;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.ConfigService;
 
 public class CreateMailConfig implements CorrectiveAction {
 
 	private final AskService askService;
 	private final MailService mailService;
-	private final UniverseService universeService;
+	private final ConfigService configService;
 
 	@Inject
 	public CreateMailConfig(final AskService askService, final MailService mailService,
-			final UniverseService universeService) {
+			final ConfigService configService) {
 		this.askService = askService;
 		this.mailService = mailService;
-		this.universeService = universeService;
+		this.configService = configService;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class CreateMailConfig implements CorrectiveAction {
 			final Configuration finalizedConfig = newConfig.build();
 
 			if (this.mailService.testConfig(finalizedConfig)) {
-				universeService.publishConfiguration(finalizedConfig);
+				this.configService.publishConfiguration(finalizedConfig);
 			} else {
 				if ("true".equals(askService
 						.askHumanMinion("Mail configuration seems incorrect ! Would you like to try again ?"))) {

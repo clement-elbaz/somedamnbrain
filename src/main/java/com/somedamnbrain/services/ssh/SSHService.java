@@ -3,20 +3,20 @@ package com.somedamnbrain.services.ssh;
 import com.google.inject.Inject;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.ConfigService;
 
 public class SSHService {
 
-	private final UniverseService universeService;
+	private final ConfigService configService;
 
 	@Inject
-	public SSHService(final UniverseService universeService) {
-		this.universeService = universeService;
+	public SSHService(final ConfigService configService) {
+		this.configService = configService;
 	}
 
 	public boolean testConnection() throws SystemNotAvailableException {
 		try {
-			this.universeService.getConfig("ssh");
+			this.configService.getConfig("ssh");
 		} catch (final NoResultException e) {
 			throw new SystemNotAvailableException(e);
 		}
