@@ -7,8 +7,8 @@ import com.somedamnbrain.entities.Entities.Configuration;
 import com.somedamnbrain.entities.Entities.Configuration.Builder;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.MailService;
 import com.somedamnbrain.services.ask.AskService;
+import com.somedamnbrain.services.mail.MailService;
 import com.somedamnbrain.services.universe.UniverseService;
 
 public class CreateMailConfig implements CorrectiveAction {

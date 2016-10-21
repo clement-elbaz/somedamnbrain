@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.inject.Inject;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.MailService;
+import com.somedamnbrain.services.mail.MailService;
 import com.somedamnbrain.services.report.Report;
 import com.somedamnbrain.services.universe.UniverseService;
 

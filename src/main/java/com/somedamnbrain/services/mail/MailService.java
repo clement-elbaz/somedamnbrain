@@ -1,4 +1,4 @@
-package com.somedamnbrain.services;
+package com.somedamnbrain.services.mail;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
