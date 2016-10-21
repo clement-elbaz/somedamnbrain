@@ -1,6 +1,7 @@
 package com.somedamnbrain.services.universe;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,6 +146,10 @@ public class SystemStateService {
 		}
 
 		return result;
+	}
+
+	public Collection<? extends SystemState> getAllSystemStates() {
+		return this.currentSystemStates.values();
 	}
 
 }

@@ -85,6 +85,7 @@ public class UniverseService {
 		modifiedUniverse.setName(universePreviousIteration.getName());
 		modifiedUniverse.addAllDiagnostics(diagnosticStateService.getAllDiagnostics());
 		modifiedUniverse.addAllConfigurations(this.configService.getAllConfigurations());
+		modifiedUniverse.addAllSystemStates(this.systemStateService.getAllSystemStates());
 		modifiedUniverse.setPreviousExecutionNumber(universePreviousIteration.getPreviousExecutionNumber() + 1);
 
 		final Universe finalizedUniverse = modifiedUniverse.build();
