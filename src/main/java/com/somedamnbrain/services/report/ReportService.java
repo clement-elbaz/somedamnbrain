@@ -195,70 +195,77 @@ public class ReportService {
 
 	public void reportSystem(final SDBSystem rootSystem, final SDBSystem currentSystem, final SystemState givenState)
 			throws UnexplainableException {
-		// Special case when current system is LocalUniverseSystem :
-		// because its diagnostics are executed before UniverseService is
-		// available, all the stabilities are wrong. In that case we recompute
-		// all stabilities for the diagnostics now, as the UniverseService is
-		// now available.
-		final SystemState state;
-		if (currentSystem instanceof LocalUniverseSystem) {
-			state = this.systemStateService.recomputeCompleteSystemStability(currentSystem);
-		} else {
-			state = givenState;
-		}
-
-		final StringBuilder subject = this.initiateSubject(rootSystem, currentSystem);
-		subject.append(currentSystem.getUniqueID() + " is ");
-		if (state.getUp()) {
-			subject.append("UP");
-		} else {
-			subject.append("DOWN");
-		}
-
-		final StringBuilder content = this.initiateContent(rootSystem, currentSystem);
-
-		if (state.getUp()) {
-			content.append(currentSystem.getUniqueID() + " is fully up and running since " + state.getStability()
-					+ " executions.");
-		} else {
-			content.append(currentSystem.getUniqueID() + " is down since " + state.getStability() + " executions.");
-
-			content.append("\r\n");
-			content.append("\r\n");
-
-			final List<Diagnostic> failedDiagnostics = this.diagnosticStateService.getFailedDiagnostics(currentSystem);
-			if (failedDiagnostics.isEmpty()) {
-				content.append("No failed diagnostics");
+		try {
+			// Special case when current system is LocalUniverseSystem :
+			// because its diagnostics are executed before UniverseService is
+			// available, all the stabilities are wrong. In that case we
+			// recompute
+			// all stabilities for the diagnostics now, as the UniverseService
+			// is
+			// now available.
+			final SystemState state;
+			if (currentSystem instanceof LocalUniverseSystem && this.universeService.getCurrentExecutionNumber() > 1) {
+				state = this.systemStateService.recomputeCompleteSystemStability(currentSystem);
 			} else {
-				content.append("The following diagnostics are in failure : ");
-				for (final Diagnostic failedDiagnostic : failedDiagnostics) {
-					content.append(failedDiagnostic.getUniqueID());
-					content.append("\r\n");
-				}
+				state = givenState;
 			}
 
-			content.append("\r\n");
-			content.append("\r\n");
-
-			final List<SDBSystem> failedDependencies = this.systemStateService.getFailedDependencies(currentSystem);
-			if (failedDependencies.isEmpty()) {
-				content.append("No failed dependencies");
+			final StringBuilder subject = this.initiateSubject(rootSystem, currentSystem);
+			subject.append(currentSystem.getUniqueID() + " is ");
+			if (state.getUp()) {
+				subject.append("UP");
 			} else {
-				content.append("The following dependencies are in failure : ");
-				for (final SDBSystem dependency : failedDependencies) {
-					content.append("\r\n");
-					content.append(dependency.getUniqueID());
-				}
+				subject.append("DOWN");
 			}
 
-		}
+			final StringBuilder content = this.initiateContent(rootSystem, currentSystem);
 
-		final Report report = new Report(subject.toString(), content.toString());
+			if (state.getUp()) {
+				content.append(currentSystem.getUniqueID() + " is fully up and running since " + state.getStability()
+						+ " executions.");
+			} else {
+				content.append(currentSystem.getUniqueID() + " is down since " + state.getStability() + " executions.");
 
-		if (state.getStability() == 0) {
-			this.alertService.promoteReportToAlert(report);
-		} else {
-			this.displayReportOnConsole(report);
+				content.append("\r\n");
+				content.append("\r\n");
+
+				final List<Diagnostic> failedDiagnostics = this.diagnosticStateService
+						.getFailedDiagnostics(currentSystem);
+				if (failedDiagnostics.isEmpty()) {
+					content.append("No failed diagnostics");
+				} else {
+					content.append("The following diagnostics are in failure : ");
+					for (final Diagnostic failedDiagnostic : failedDiagnostics) {
+						content.append(failedDiagnostic.getUniqueID());
+						content.append("\r\n");
+					}
+				}
+
+				content.append("\r\n");
+				content.append("\r\n");
+
+				final List<SDBSystem> failedDependencies = this.systemStateService.getFailedDependencies(currentSystem);
+				if (failedDependencies.isEmpty()) {
+					content.append("No failed dependencies");
+				} else {
+					content.append("The following dependencies are in failure : ");
+					for (final SDBSystem dependency : failedDependencies) {
+						content.append("\r\n");
+						content.append(dependency.getUniqueID());
+					}
+				}
+
+			}
+
+			final Report report = new Report(subject.toString(), content.toString());
+
+			if (state.getStability() == 0) {
+				this.alertService.promoteReportToAlert(report);
+			} else {
+				this.displayReportOnConsole(report);
+			}
+		} catch (final SystemNotAvailableException e) {
+			throw new UnexplainableException(e);
 		}
 
 	}

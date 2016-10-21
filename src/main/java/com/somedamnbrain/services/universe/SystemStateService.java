@@ -57,13 +57,11 @@ public class SystemStateService {
 		final SystemState.Builder state = SystemState.newBuilder();
 
 		state.setUniqueId(system.getUniqueID());
-		state.setStability(this.computeSystemStability(system));
 
-		final boolean allDependenciesUp = this.allSystemsAvailable(system.getDependencies());
-		final boolean allDiagnosticsOk = this.diagnosticStateService.getFailedDiagnostics(system).isEmpty();
-
-		final boolean systemUp = allDependenciesUp && allDiagnosticsOk;
+		final boolean systemUp = this.isSystemUp(system);
 		state.setUp(systemUp);
+
+		state.setStability(this.computeSystemStability(system, systemUp));
 
 		final SystemState finalizedState = state.build();
 		this.currentSystemStates.put(finalizedState.getUniqueId(), finalizedState);
@@ -71,27 +69,24 @@ public class SystemStateService {
 
 	}
 
-	private int computeSystemStability(final SDBSystem system) throws UnexplainableException {
-		try {
-			if (!this.configured) {
-				return 0;
-			}
-			int minimumStability = Integer.MAX_VALUE;
+	private boolean isSystemUp(final SDBSystem system) {
+		final boolean allDependenciesUp = this.allSystemsAvailable(system.getDependencies());
+		final boolean allDiagnosticsOk = this.diagnosticStateService.getFailedDiagnostics(system).isEmpty();
 
-			for (final Diagnostic diagnostic : system.getDiagnostics()) {
-				final DiagnosticResult result = this.diagnosticStateService.getResultForDiagnostic(diagnostic);
-				minimumStability = Math.min(minimumStability, result.getStability());
-			}
+		return allDependenciesUp && allDiagnosticsOk;
+	}
 
-			for (final SDBSystem dependency : system.getDependencies()) {
-				final SystemState dependencyState = this.currentSystemStates.get(dependency.getUniqueID());
-				minimumStability = Math.min(minimumStability, dependencyState.getStability());
-			}
-
-			return minimumStability;
-		} catch (final NoResultException e) {
-			throw new UnexplainableException(e);
+	private int computeSystemStability(final SDBSystem system, final boolean systemUp) {
+		if (!this.configured) {
+			return 0;
 		}
+		final SystemState previousState = this.previousSystemStates.get(system.getUniqueID());
+
+		if (systemUp != previousState.getUp()) {
+			return 0;
+		}
+
+		return previousState.getStability() + 1;
 	}
 
 	private boolean allSystemsAvailable(final List<SDBSystem> systems) {
@@ -118,7 +113,8 @@ public class SystemStateService {
 
 			}
 
-			final int correctSystemStability = this.computeSystemStability(currentSystem);
+			final int correctSystemStability = this.computeSystemStability(currentSystem,
+					this.isSystemUp(currentSystem));
 
 			final SystemState.Builder correctedSystemState = this.currentSystemStates.get(currentSystem.getUniqueID())
 					.toBuilder();
