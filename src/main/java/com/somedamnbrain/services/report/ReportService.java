@@ -12,6 +12,8 @@ import com.somedamnbrain.entities.Entities.SystemState;
 import com.somedamnbrain.exceptions.SystemNotAvailableException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.alert.AlertService;
+import com.somedamnbrain.services.universe.DiagnosticStateService;
+import com.somedamnbrain.services.universe.SystemStateService;
 import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.universe.LocalUniverseSystem;
@@ -19,12 +21,17 @@ import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 public class ReportService {
 
 	private final UniverseService universeService;
+	private final DiagnosticStateService diagnosticStateService;
+	private final SystemStateService systemStateService;
 
 	private final AlertService alertService;
 
 	@Inject
-	public ReportService(final UniverseService universeService, final AlertService alertService) {
+	public ReportService(final UniverseService universeService, final DiagnosticStateService diagnosticStateService,
+			final SystemStateService systemStateService, final AlertService alertService) {
 		this.universeService = universeService;
+		this.diagnosticStateService = diagnosticStateService;
+		this.systemStateService = systemStateService;
 		this.alertService = alertService;
 	}
 
@@ -41,12 +48,12 @@ public class ReportService {
 		}
 
 		// launch an alert if this result was preceded by a correction attempt
-		if (this.universeService.diagnosticAlreadyRan(diagnostic)) {
+		if (this.diagnosticStateService.diagnosticAlreadyRan(diagnostic)) {
 			shouldAlert = true;
 			previousCorrectionAttempt = true;
 		}
 
-		this.universeService.storeDiagnosticResult(diagnostic, result);
+		this.diagnosticStateService.storeDiagnosticResult(diagnostic, result);
 
 		final Report report = this.computeReport(rootSystem, currentSystem, diagnostic, result, unstable,
 				previousCorrectionAttempt);
@@ -195,7 +202,7 @@ public class ReportService {
 		// now available.
 		final SystemState state;
 		if (currentSystem instanceof LocalUniverseSystem) {
-			state = this.universeService.recomputeCompleteSystemStability(currentSystem);
+			state = this.systemStateService.recomputeCompleteSystemStability(currentSystem);
 		} else {
 			state = givenState;
 		}
@@ -219,7 +226,7 @@ public class ReportService {
 			content.append("\r\n");
 			content.append("\r\n");
 
-			final List<Diagnostic> failedDiagnostics = this.universeService.getFailedDiagnostics(currentSystem);
+			final List<Diagnostic> failedDiagnostics = this.diagnosticStateService.getFailedDiagnostics(currentSystem);
 			if (failedDiagnostics.isEmpty()) {
 				content.append("No failed diagnostics");
 			} else {
@@ -233,7 +240,7 @@ public class ReportService {
 			content.append("\r\n");
 			content.append("\r\n");
 
-			final List<SDBSystem> failedDependencies = this.universeService.getFailedDependencies(currentSystem);
+			final List<SDBSystem> failedDependencies = this.systemStateService.getFailedDependencies(currentSystem);
 			if (failedDependencies.isEmpty()) {
 				content.append("No failed dependencies");
 			} else {
@@ -263,7 +270,7 @@ public class ReportService {
 	}
 
 	public void reportStability() throws SystemNotAvailableException, UnexplainableException {
-		final int globalStability = this.universeService.computeGlobalStability();
+		final int globalStability = this.diagnosticStateService.computeGlobalStability();
 		final boolean stable = globalStability != 0;
 
 		final StringBuilder subject = new StringBuilder();
@@ -280,7 +287,7 @@ public class ReportService {
 		content.append("\r\n");
 		content.append("\r\n");
 
-		final List<DiagnosticResult> failedDiagnostics = this.universeService.getFailedDiagnostics();
+		final List<DiagnosticResult> failedDiagnostics = this.diagnosticStateService.getAllFailedDiagnostics();
 
 		if (failedDiagnostics.isEmpty()) {
 			content.append("No diagnostics failing.");
@@ -296,7 +303,7 @@ public class ReportService {
 		content.append("\r\n");
 		content.append("\r\n");
 
-		final List<SystemState> failedSystems = this.universeService.getFailedSystems();
+		final List<SystemState> failedSystems = this.systemStateService.getFailedSystems();
 		if (failedSystems.isEmpty()) {
 			content.append("No systems failing.");
 		} else {

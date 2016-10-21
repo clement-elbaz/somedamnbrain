@@ -16,7 +16,7 @@ import com.somedamnbrain.exceptions.ExplainableException;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.report.ReportService;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.SystemStateService;
 import com.somedamnbrain.systems.SDBSystem;
 
 public class SystemDiagnosticService {
@@ -25,14 +25,14 @@ public class SystemDiagnosticService {
 
 	private final ReportService reportService;
 	private final SystemSelectorService selectorService;
-	private final UniverseService universeService;
+	private final SystemStateService systemStateService;
 
 	@Inject
 	public SystemDiagnosticService(final ReportService reportService, final SystemSelectorService selectorService,
-			final UniverseService universeService) {
+			final SystemStateService systemStateService) {
 		this.reportService = reportService;
 		this.selectorService = selectorService;
-		this.universeService = universeService;
+		this.systemStateService = systemStateService;
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class SystemDiagnosticService {
 			}
 		}
 
-		final SystemState state = this.universeService.computeAndStoreSystemState(system);
+		final SystemState state = this.systemStateService.computeAndStoreSystemState(system);
 
 		if (state.getUp()) {
 			system.executeIfOperational();

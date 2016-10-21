@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.DiagnosticStateService;
 import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.git.GitSystem;
@@ -18,14 +18,14 @@ public class SDBSourceCodeSystem extends AbstractSystem {
 
 	private final MavenSystem mavenSystem;
 
-	private final UniverseService universeService;
+	private final DiagnosticStateService diagnosticStateService;
 
 	@Inject
 	public SDBSourceCodeSystem(final GitSystem gitSystem, final MavenSystem mavenSystem,
-			final UniverseService universeService) {
+			final DiagnosticStateService diagnosticStateService) {
 		this.gitSystem = gitSystem;
 		this.mavenSystem = mavenSystem;
-		this.universeService = universeService;
+		this.diagnosticStateService = diagnosticStateService;
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public class SDBSourceCodeSystem extends AbstractSystem {
 
 	@Override
 	public List<Diagnostic> getDiagnostics() {
-		return Diagnostic.notImplemented(this, universeService);
+		return Diagnostic.notImplemented(this, diagnosticStateService);
 	}
 
 	@Override

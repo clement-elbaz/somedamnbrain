@@ -6,7 +6,7 @@ import java.util.List;
 import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.DiagnosticStateService;
 import com.somedamnbrain.systems.SDBSystem;
 
 /**
@@ -58,12 +58,12 @@ public interface Diagnostic {
 	 * @return a Diagnosticresult object
 	 */
 	public default DiagnosticResult newResult(final boolean success, final String machineMessage,
-			final String humanMessage, final UniverseService universeService) {
-		DiagnosticResult.Builder result = DiagnosticResult.newBuilder();
+			final String humanMessage, final DiagnosticStateService diagnosticStateService) {
+		final DiagnosticResult.Builder result = DiagnosticResult.newBuilder();
 		result.setSuccess(success);
 		result.setHumanMessage(humanMessage);
 		result.setMachineMessage(machineMessage);
-		result.setStability(universeService.computeStability(this, machineMessage));
+		result.setStability(diagnosticStateService.computeDiagnosticStability(this, machineMessage));
 		result.setDiagnosticId(this.getUniqueID());
 		return result.build();
 	}
@@ -79,8 +79,9 @@ public interface Diagnostic {
 	 * @return a list of diagnostic containing one failing "not implemented"
 	 *         diagnostic.
 	 */
-	public static List<Diagnostic> notImplemented(SDBSystem system, UniverseService universeService) {
-		List<Diagnostic> result = new ArrayList<Diagnostic>();
+	public static List<Diagnostic> notImplemented(final SDBSystem system,
+			final DiagnosticStateService diagnosticStateService) {
+		final List<Diagnostic> result = new ArrayList<Diagnostic>();
 
 		result.add(new Diagnostic() {
 
@@ -92,11 +93,11 @@ public interface Diagnostic {
 			@Override
 			public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
 				return this.newResult(false, "not-implemented", "No diagnostic implemented for this system",
-						universeService);
+						diagnosticStateService);
 			}
 
 			@Override
-			public CorrectiveAction getCorrection(DiagnosticResult diagnosticResult) throws NoResultException {
+			public CorrectiveAction getCorrection(final DiagnosticResult diagnosticResult) throws NoResultException {
 				throw new NoResultException();
 			}
 

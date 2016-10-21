@@ -7,19 +7,19 @@ import com.somedamnbrain.entities.Entities.DiagnosticResult;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.ConfigService;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.DiagnosticStateService;
 import com.somedamnbrain.systems.mail.corrections.CreateMailConfig;
 
 public class MailConfigPresent implements Diagnostic {
 
-	private final UniverseService universeService;
+	private final DiagnosticStateService diagnosticStateService;
 	private final ConfigService configService;
 	private final CreateMailConfig createMailConfig;
 
 	@Inject
-	public MailConfigPresent(final UniverseService universeService, final ConfigService configService,
+	public MailConfigPresent(final DiagnosticStateService diagnosticStateService, final ConfigService configService,
 			final CreateMailConfig createMailConfig) {
-		this.universeService = universeService;
+		this.diagnosticStateService = diagnosticStateService;
 		this.configService = configService;
 		this.createMailConfig = createMailConfig;
 	}
@@ -33,9 +33,9 @@ public class MailConfigPresent implements Diagnostic {
 	public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
 		try {
 			this.configService.getConfig("mail");
-			return this.newResult(true, "mail-config-OK", "Mail config is present", universeService);
+			return this.newResult(true, "mail-config-OK", "Mail config is present", diagnosticStateService);
 		} catch (final NoResultException e) {
-			return this.newResult(false, "mail-config-missing", "Mail config is missing", universeService);
+			return this.newResult(false, "mail-config-missing", "Mail config is missing", diagnosticStateService);
 		}
 
 	}

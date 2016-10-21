@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.DiagnosticStateService;
 import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.ssh.SSHSystem;
@@ -17,14 +17,14 @@ public class MergeUniverseSystem extends AbstractSystem {
 
 	private final SSHSystem sshSystem;
 
-	private final UniverseService universeService;
+	private final DiagnosticStateService diagnosticStateService;
 
 	@Inject
 	public MergeUniverseSystem(final LocalUniverseSystem universeSystem, final SSHSystem sshSystem,
-			final UniverseService universeService) {
+			final DiagnosticStateService diagnosticStateService) {
 		this.universeSystem = universeSystem;
 		this.sshSystem = sshSystem;
-		this.universeService = universeService;
+		this.diagnosticStateService = diagnosticStateService;
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class MergeUniverseSystem extends AbstractSystem {
 
 	@Override
 	public List<Diagnostic> getDiagnostics() {
-		return Diagnostic.notImplemented(this, universeService);
+		return Diagnostic.notImplemented(this, diagnosticStateService);
 	}
 
 	@Override

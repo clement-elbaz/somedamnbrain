@@ -11,7 +11,7 @@ import com.somedamnbrain.entities.Entities.Universe;
 import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.filesystem.FilesystemService;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.DiagnosticStateService;
 import com.somedamnbrain.systems.universe.LocalUniverseSystem;
 import com.somedamnbrain.systems.universe.corrections.InitUniverseFile;
 import com.somedamnbrain.systems.universe.corrections.MoveCorruptedFile;
@@ -19,7 +19,7 @@ import com.somedamnbrain.systems.universe.corrections.MoveCorruptedFile;
 public class ExistenceDiagnostic implements Diagnostic {
 
 	private final FilesystemService filesystem;
-	private final UniverseService universeService;
+	private final DiagnosticStateService diagnosticStateService;
 
 	private final InitUniverseFile initUniverseFile;
 	private final MoveCorruptedFile moveCorruptedFile;
@@ -33,10 +33,10 @@ public class ExistenceDiagnostic implements Diagnostic {
 	 *            init universe file correction
 	 */
 	@Inject
-	public ExistenceDiagnostic(final FilesystemService filesystem, final UniverseService universeService,
+	public ExistenceDiagnostic(final FilesystemService filesystem, final DiagnosticStateService diagnosticStateService,
 			final InitUniverseFile initUniverseFile, final MoveCorruptedFile moveCorruptedFile) {
 		this.filesystem = filesystem;
-		this.universeService = universeService;
+		this.diagnosticStateService = diagnosticStateService;
 		this.initUniverseFile = initUniverseFile;
 		this.moveCorruptedFile = moveCorruptedFile;
 	}
@@ -59,16 +59,18 @@ public class ExistenceDiagnostic implements Diagnostic {
 	@Override
 	public DiagnosticResult attemptDiagnostic() throws UnexplainableException {
 		try {
-			Universe universe = Universe.parseFrom(filesystem.readFile(LocalUniverseSystem.UNIVERSE_FILE_PATH));
+			final Universe universe = Universe.parseFrom(filesystem.readFile(LocalUniverseSystem.UNIVERSE_FILE_PATH));
 
 			return this.newResult(true, "universe-existence-OK",
-					"Universe file " + universe.getName() + " is present and properly formatted", universeService);
-		} catch (InvalidProtocolBufferException e) {
+					"Universe file " + universe.getName() + " is present and properly formatted",
+					diagnosticStateService);
+		} catch (final InvalidProtocolBufferException e) {
 			return this.newResult(false, "universe-existence-unreadable", "Universe file is not readable",
-					universeService);
+					diagnosticStateService);
 
-		} catch (NoResultException e) {
-			return this.newResult(false, "universe-existence-missing", "Universe file is not present", universeService);
+		} catch (final NoResultException e) {
+			return this.newResult(false, "universe-existence-missing", "Universe file is not present",
+					diagnosticStateService);
 		}
 	}
 
@@ -80,7 +82,7 @@ public class ExistenceDiagnostic implements Diagnostic {
 	 * entities.Entities.DiagnosticResult)
 	 */
 	@Override
-	public CorrectiveAction getCorrection(DiagnosticResult diagnosticResult) throws NoResultException {
+	public CorrectiveAction getCorrection(final DiagnosticResult diagnosticResult) throws NoResultException {
 		if (StringUtils.equals("universe-existence-missing", diagnosticResult.getMachineMessage())) {
 			return this.initUniverseFile;
 		}

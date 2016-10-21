@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.universe.UniverseService;
+import com.somedamnbrain.services.universe.DiagnosticStateService;
 import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.machine.MachineSystem;
@@ -15,12 +15,12 @@ public class JavaSystem extends AbstractSystem {
 
 	private final MachineSystem machineSystem;
 
-	private final UniverseService universeService;
+	private final DiagnosticStateService diagnosticStateService;
 
 	@Inject
-	public JavaSystem(final MachineSystem machineSystem, final UniverseService universeService) {
+	public JavaSystem(final MachineSystem machineSystem, final DiagnosticStateService diagnosticStateService) {
 		this.machineSystem = machineSystem;
-		this.universeService = universeService;
+		this.diagnosticStateService = diagnosticStateService;
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class JavaSystem extends AbstractSystem {
 
 	@Override
 	public List<Diagnostic> getDiagnostics() {
-		return Diagnostic.notImplemented(this, universeService);
+		return Diagnostic.notImplemented(this, diagnosticStateService);
 	}
 
 	@Override
