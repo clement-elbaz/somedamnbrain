@@ -6,21 +6,25 @@ import java.util.List;
 import com.google.inject.Inject;
 import com.somedamnbrain.diagnostic.Diagnostic;
 import com.somedamnbrain.exceptions.UnexplainableException;
-import com.somedamnbrain.services.universe.UniverseService;
 import com.somedamnbrain.systems.AbstractSystem;
 import com.somedamnbrain.systems.SDBSystem;
 import com.somedamnbrain.systems.mail.MailSystem;
+import com.somedamnbrain.systems.ssh.diagnostics.SSHConfigPresent;
+import com.somedamnbrain.systems.ssh.diagnostics.SSHTestConnection;
 
 public class SSHSystem extends AbstractSystem {
 
-	private final UniverseService universeService;
-
 	private final MailSystem mailSystem;
 
+	private final SSHConfigPresent sshConfigPresent;
+	private final SSHTestConnection sshTestConnection;
+
 	@Inject
-	public SSHSystem(final UniverseService universeService, final MailSystem mailSystem) {
-		this.universeService = universeService;
+	public SSHSystem(final MailSystem mailSystem, final SSHConfigPresent sshConfigPresent,
+			final SSHTestConnection sshTestConnection) {
 		this.mailSystem = mailSystem;
+		this.sshConfigPresent = sshConfigPresent;
+		this.sshTestConnection = sshTestConnection;
 	}
 
 	@Override
@@ -35,7 +39,7 @@ public class SSHSystem extends AbstractSystem {
 
 	@Override
 	public List<Diagnostic> getDiagnostics() {
-		return Diagnostic.notImplemented(this, universeService);
+		return Arrays.asList(sshConfigPresent, sshTestConnection);
 	}
 
 	@Override
