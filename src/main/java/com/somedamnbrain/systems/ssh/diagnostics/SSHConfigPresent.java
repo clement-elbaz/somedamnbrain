@@ -8,16 +8,20 @@ import com.somedamnbrain.exceptions.NoResultException;
 import com.somedamnbrain.exceptions.UnexplainableException;
 import com.somedamnbrain.services.universe.ConfigService;
 import com.somedamnbrain.services.universe.DiagnosticStateService;
+import com.somedamnbrain.systems.ssh.corrections.CreateSSHConfig;
 
 public class SSHConfigPresent implements Diagnostic {
 
 	private final DiagnosticStateService diagnosticStateService;
 	private final ConfigService configService;
+	private final CreateSSHConfig createSSHConfig;
 
 	@Inject
-	public SSHConfigPresent(final DiagnosticStateService diagnosticStateService, final ConfigService configService) {
+	public SSHConfigPresent(final DiagnosticStateService diagnosticStateService, final ConfigService configService,
+			final CreateSSHConfig createSSHConfig) {
 		this.diagnosticStateService = diagnosticStateService;
 		this.configService = configService;
+		this.createSSHConfig = createSSHConfig;
 	}
 
 	@Override
@@ -37,8 +41,7 @@ public class SSHConfigPresent implements Diagnostic {
 
 	@Override
 	public CorrectiveAction getCorrection(final DiagnosticResult diagnosticResult) throws NoResultException {
-		// TODO
-		throw new NoResultException();
+		return this.createSSHConfig;
 	}
 
 }

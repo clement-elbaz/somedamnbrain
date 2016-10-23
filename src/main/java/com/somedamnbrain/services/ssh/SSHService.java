@@ -21,8 +21,8 @@ public class SSHService {
 			throw new SystemNotAvailableException(e);
 		}
 
-		// TODO
-		throw new RuntimeException("not implemented");
+		// TODO not implemented
+		return false;
 	}
 
 }
