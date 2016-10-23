@@ -54,4 +54,30 @@ public class ConfigService {
 		newConfig.addConfigItems(configItem.build());
 	}
 
+	public void reviewAllConfigs() throws UnexplainableException {
+		for (final Configuration config : this.currentConfigs.values()) {
+			try {
+				this.reviewConfig(config);
+			} catch (final SystemNotAvailableException e) {
+				System.out.println("Not human minion available, skipping configuration review");
+			}
+		}
+	}
+
+	private void reviewConfig(final Configuration config) throws SystemNotAvailableException, UnexplainableException {
+		if ("true".equals(this.askService
+				.askHumanMinion("Would you like to review the following configuration ? " + config.getConfigName()))) {
+			System.out.println("Current configuration is :");
+			for (final ConfigItem configItem : config.getConfigItemsList()) {
+				System.out.println(configItem.getKey() + " : " + configItem.getValue());
+			}
+
+			if ("true".equals(
+					this.askService.askHumanMinion("Would you like to destroy and rebuild this configuration ?"))) {
+				this.currentConfigs.remove(config.getConfigName());
+			}
+		}
+
+	}
+
 }

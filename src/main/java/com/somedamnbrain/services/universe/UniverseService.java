@@ -56,6 +56,8 @@ public class UniverseService {
 			for (final Configuration config : universePreviousIteration.getConfigurationsList()) {
 				this.configService.publishConfiguration(config);
 			}
+			// Review configurations
+			this.configService.reviewAllConfigs();
 
 		} catch (final InvalidProtocolBufferException e) {
 			this.configured = false;
